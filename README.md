@@ -2,7 +2,7 @@
 
 Energiewirtschaft - Stromsektormodellierung Group project
 
-![image](https://m.xkcd.com/comics/fixing_problems.jpg)
+![image](https://imgs.xkcd.com/comics/fixing_problems.png)
 
 ## Project Details
 
