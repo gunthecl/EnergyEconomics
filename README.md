@@ -8,6 +8,9 @@ Energiewirtschaft - Stromsektormodellierung Group project
 
 
 **Next Homework Assignment**: Due May 14
+Warning after running solve(dispatch_problem)
+WARNING: Solver does not appear to support providing initial feasible solutions.
+
 
 ## Team Members
 
