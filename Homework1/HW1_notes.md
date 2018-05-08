@@ -29,19 +29,24 @@ Describe and explain the differences in a few sentences.
 
 ** Set the storage level to 50 percent in the first time step**
 - dispatch plan very similar to that of task 1. Difference occur in the first period were we use less lignite capacity since less electricity is needed to reach the max. storage level
-- total costs are 36124.8, which is roughly 200 lower compared to task 1. Cost difference occurs since we essentially get "electricity for free" by assuming the initial storage level to be 7.5 and do not impose an end condition.
+- total costs are 36,124.8, which is roughly 200 lower compared to task 1. Cost difference occurs since we essentially get "electricity for free" by assuming the initial storage level to be 7.5 and do not impose an end condition.
 \includegraphics[]{dispatch_2b.png}
 
 ** Set the storage level to 50 percent in the first and last time step**
 - dispatch plan very similar to that of task 2a. Differences occur in the storage level patterns. Storage level is decreased to zero at peak demand but increased again to 7.5 in last period
-- total costs are 36466.7, which are highest overall costs. High costs occur because of efficiency losses in storage. To reach the end storage level of 7.5 we must pay more than we gain by using the initially stored energy. 
+- total costs are 36,466.7, which are highest overall costs. High costs occur because of efficiency losses in storage. To reach the end storage level of 7.5 we must pay more than we gain by using the initially stored energy. 
 
 ** Force the start- and endlevel to be equal, without specifying a value**
 - same dispatch schedule and total costs as in task 1 
-- this means that if storage can act only as to shift generation between periods, the min storage level is optimal as starting condition 
+- this means that if storage can act only as to shift energy generation between periods, the min storage level is optimal as starting condition 
+- we use generation from storage to partly substitute natural gas (high mc) since the lignite marginal costs devided by storage inefficiency (23.58/0.88 = 26.8), which is used to fill the sotrage, is cheaper than gas (56.085)
+
 \includegraphics[]{dispatch_2c.png}
 
 ## Task 3 Renewables
 
- 
+Questions from Claudia: 
+1) Is the availability parameter the relative availability  of e.g. wind compared to the max. capacity or the absolute availability at any point in time? (i.e. can availability only lie between 0 and 1)
+2) should we us the installed solar/wind capacity for g_r_max ?
+
 
