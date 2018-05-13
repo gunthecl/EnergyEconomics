@@ -36,13 +36,13 @@ demand = [60,
           80,
           71]
 co_price = 7
-c_fuel = NamedArray([3, 6.21, 10.6, 31.08], (DISP), ("Technologies"))
-eta    = NamedArray([0.33, 0.42, 0.42, 0.59], (DISP,), ("Technologies",))
-om     = NamedArray([10, 6, 6, 2], (DISP,), ("Technologies",))
-lambda = NamedArray([0, 0.399, 0.337, 0.201], (DISP,), ("Technologies",))
+c_fuel = NamedArray([3, 6.21, 10.6, 31.08], (DISP,), ("TECH",))
+eta    = NamedArray([0.33, 0.42, 0.42, 0.59], (DISP,), ("TECH",))
+om     = NamedArray([10, 6, 6, 2], (DISP,), ("TECH",))
+lambda = NamedArray([0, 0.399, 0.337, 0.201], (DISP,), ("TECH",))
 mc = c_fuel ./ eta + co_price .* lambda + om
 
-g_max = NamedArray([20, 30, 25, 15], (DISP), ("Technologies")
+g_max = NamedArray([20, 30, 25, 15], (DISP,), ("TECH",))
 solar_availability = [
 0
 0
@@ -213,7 +213,7 @@ demand[hour]
 solve(dispatch_problem)
 
 result = vcat(getvalue(G).innerArray, g_res, getvalue(G_stor).innerArray')'
-generation = NamedArray(result, (HOUR, TECHNOLOGIES), ("Hour", "Technology"))
+generation = NamedArray(result, (HOUR, TECH), ("Hour", "Technology"))
 storage_withdraw = -getvalue(D_stor).innerArray
 storage_level = getvalue(L).innerArray
 @userplot Areaplot
@@ -235,8 +235,8 @@ storage_level = getvalue(L).innerArray
     end
 end
 l = @layout([a{0.9h};b])
-dispatch_plot = areaplot(generation, label=TECHNOLOGIES, title="Dispatch",
-    color=reshape([:red, :brown, :grey, :orange, :blue, :yellow, :purple],1, length(TECHNOLOGIES)),
+dispatch_plot = areaplot(generation, label=TECH, title="Dispatch",
+    color=reshape([:red, :brown, :grey, :orange, :blue, :yellow, :purple],1, length(TECH)),
     legend=:bottomleft)
 plot!(dispatch_plot, storage_withdraw, fill=0, label="Storage withdraw", color=:purple)
 plot!(dispatch_plot, demand, c=:black, label="Demand", width=3, legend=:bottomright)
