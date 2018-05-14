@@ -98,8 +98,8 @@ wind_availability = [
 installed_solar = 25
 installed_wind = 40
 
-res_infeed = hcat(wind_availability*installed_wind, solar_availability*installed_solar)'
-g_res = NamedArray(res_infeed, (RES,HOUR), ("Renewable Energy Source", "Hour"))
+g_res = hcat(wind_availability*installed_wind, solar_availability*installed_solar)'
+res_infeed = NamedArray(res_infeed, (RES,HOUR), ("Renewable Energy Source", "Hour"))
 
 #= Task 3 Renewables
 res_availability     = hcat(wind_availability*installed_wind, solar_availability*installed_solar)'
@@ -112,22 +112,23 @@ storage_gen = 5
 
 dispatch_problem = Model(solver=GurobiSolver())
 
+#=
 @variables dispatch_problem begin
         G[DISP, HOUR] >= 0 # generation from power plants
         G_stor[HOUR] >= 0 #generation from storage
         L[HOUR] >= 0 #current storage level
         D_stor[HOUR] >= 0 #consumption from storage
-end
-
-#= Task 3 Renewables
-@variables dispatch_problem begin
-        G[DISP, HOUR] >= 0 # generation from power plants
-        G_stor[HOUR] >= 0 #generation from storage
-        L[HOUR] >= 0 #current storage level
-        D_stor[HOUR] >= 0 #consumption from storage
-        g_res[RES, HOUR] >= 0
 end
 =#
+
+# Task 3 Renewables
+@variables dispatch_problem begin
+        G[DISP, HOUR] >= 0 # generation from power plants
+        G_stor[HOUR] >= 0 #generation from storage
+        L[HOUR] >= 0 #current storage level
+        D_stor[HOUR] >= 0 #consumption from storage
+        G_res[RES, HOUR] >= 0
+end
 
 JuMP.fix(L[1], 0)
 JuMP.fix(L[24], 0)
@@ -159,7 +160,7 @@ start_end = [1,24]
 
 @constraint(dispatch_problem, Market_Clearing[hour=HOUR],
 sum(G[disp, hour] for disp in DISP)
-+ sum(g_res[res, hour] for res in RES)
++ sum(G_res[res, hour] for res in RES)
 + G_stor[hour]
 ==
 demand[hour]
@@ -185,7 +186,7 @@ demand[hour]
 #= Task 3 Renewables
 # 3a: No curtailment and storages
 @constraint(dispatch_problem, Res_Generation_max[res=RES, hour=HOUR],
-    g_res[res, hour] <= res_infeed[res, hour]
+    G_res[res, hour] <= res_infeed[res, hour]
 );
 
 # 3b: Curtailment, but no storages
@@ -198,17 +199,15 @@ demand[hour]
 );
 
 # Remember to disable storages!
-
-# 3b: Curtailment and storages
+=#
+# 3c: Curtailment and storages
 @constraint(dispatch_problem, Res_Generation_max[res=RES, hour=HOUR],
-    g_res[res, hour] <= res_infeed[res, hour]
+    G_res[res, hour] <= res_infeed[res, hour]
 );
 
 @constraint(dispatch_problem, Res_Generation_min[res=RES, hour=HOUR],
-    g_res[res, hour] >= res_infeed[res, hour]*0.9
+    G_res[res, hour] >= res_infeed[res, hour]*0.9
 );
-
-=#
 
 solve(dispatch_problem)
 
@@ -245,7 +244,7 @@ level_plot = plot(storage_level, width=2, color=:black, legend=false, title="Sto
 
 
 plot(dispatch_plot,level_plot, layout=l)
-savefig("dispatch.pdf")
+savefig("dispatch1.pdf")
 # Calculate total costs (marginal cost * production)
 all_mc = vcat(mc,0,0,0)
 hourly_cost = generation*all_mc
