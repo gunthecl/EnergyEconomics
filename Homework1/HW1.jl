@@ -99,16 +99,10 @@ installed_solar = 25
 installed_wind = 40
 
 g_res = hcat(wind_availability*installed_wind, solar_availability*installed_solar)'
-res_infeed = NamedArray(res_infeed, (RES,HOUR), ("Renewable Energy Source", "Hour"))
+res_infeed = NamedArray(g_res, (RES,HOUR), ("Renewable Energy Source", "Hour"))
 
-#= Task 3 Renewables
-res_availability     = hcat(wind_availability*installed_wind, solar_availability*installed_solar)'
-g_max_res            = NamedArray([1,1], (RES,), ("Max. generation parameter",)) # which parameters should we use?
-res_infeed           = hcat(res_availability.*g_max_res)
-=#
-
-storage_max = 15
-storage_gen = 5
+storage_max = 0
+storage_gen = 0
 
 dispatch_problem = Model(solver=GurobiSolver())
 
@@ -124,10 +118,10 @@ end
 # Task 3 Renewables
 @variables dispatch_problem begin
         G[DISP, HOUR] >= 0 # generation from power plants
-        G_stor[HOUR] >= 0 #generation from storage
-        L[HOUR] >= 0 #current storage level
-        D_stor[HOUR] >= 0 #consumption from storage
-        G_res[RES, HOUR] >= 0
+        G_stor[HOUR] >= 0 # generation from storage
+        L[HOUR] >= 0 # current storage level
+        D_stor[HOUR] >= 0 # consumption from storage
+        G_res[RES, HOUR] >= 0 # renewables generation
 end
 
 JuMP.fix(L[1], 0)
@@ -191,11 +185,11 @@ demand[hour]
 
 # 3b: Curtailment, but no storages
 @constraint(dispatch_problem, Res_Generation_max[res=RES, hour=HOUR],
-    g_res[res, hour] <= res_infeed[res, hour]
+    G_res[res, hour] <= res_infeed[res, hour]
 );
 
 @constraint(dispatch_problem, Res_Generation_min[res=RES, hour=HOUR],
-    g_res[res, hour] >= res_infeed[res, hour]*0.9
+    G_res[res, hour] >= res_infeed[res, hour]*0.9
 );
 
 # Remember to disable storages!
@@ -211,7 +205,8 @@ demand[hour]
 
 solve(dispatch_problem)
 
-result = vcat(getvalue(G).innerArray, g_res, getvalue(G_stor).innerArray')'
+result = vcat(getvalue(G).innerArray, getvalue(G_res).innerArray,
+    getvalue(G_stor).innerArray')'
 generation = NamedArray(result, (HOUR, TECH), ("Hour", "Technology"))
 storage_withdraw = -getvalue(D_stor).innerArray
 storage_level = getvalue(L).innerArray
