@@ -82,3 +82,21 @@ in all cases: price(s) are volatile and increase in times of peak load. when tra
 3b: one integrated market, price is least volatile compared to other scenarios
 3c50%: in times where transmission constraints bind, we see up to 4 different prices (market splitting), whereas at some points in time up to three zones (north, west, east) form one market with one price 
 3c100%: similar patterns as in 3c50%%. market splitting is less frequent due to higher transmission capacity. price is slighlty less volatile compared to 3c50%.
+
+
+d)
+Energy-Only Market: Market design where only energy is traded and power generators get compensated only for the power they actually produce. Other services like providing balancing capacity are not rewarded.
+The model at hand represents a energy-only market since only energy is traded, only energy generation costs are minimized and the energy price is determined by aggregate supply (merit order) and demand (and possible line congestions). The capacity market is not modelled and peak load power plants, like the gas plants in 3b, would not receive compensation for their capacity provision.
+
+Market Coupling: Mechanism of connecting two or more neighbouring power markets with means of cross-border interconnectors such that the overall economic wellfare is increased due to market integration. If prelimimary settlement of power markets lead to different market prices in neighbouring countries (zones), electricity can be traded between the two zones such that the overall efficiency is increased and the price difference decreases. Following the interpretation of Ehrenmann and Smeers (2004, p. 23), we can represent market coupling  by assuming that the of settled power price in the market of each zone takes is a function of its net imports. Based on these inverse demand functions, the energy trade between zones is settled on an interzonal market.
+
+--> Though transport model contains different zones and transmission constraint, it would be more appropriate to represent Market coupling in two-step clearing process. First, each zone`s energy balance should be preliminarily cleared. Then inter-zonal trading can be admitted. 
+
+
+Market Splitting: Mechanism of deviding a single power market (zone) into two or more zones due to lack of intra-line capacity, resulting in line congestion. The subzones resulting from market splitting will have different prices. This can be seen in 3c, where market splitting between two or more zones occurs temporarily as line congestion occurs. As explained by Ehrenmann and Smeers (2004, p. 16), the zones resulting from market splitting can be fixed or variable, while we see the latter in our transport model.
+
+#Explain how these concepts are represented in the model and if not,
+#what additional constraints/representations are missing. Refer to the paper by
+# Ehrenmann and Smeers.
+
+-- whatelse??
