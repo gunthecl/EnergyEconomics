@@ -1,0 +1,5 @@
+﻿,North,West,East,South
+North,0,4000,4000,0
+West,4000,0,2000,4000
+East,4000,2000,0,0
+South,0,4000,0,0

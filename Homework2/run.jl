@@ -1,4 +1,6 @@
-cd("/Users/claudiaguenther/Documents/Studium/MEMS/SS2018/EnergyEconomics/Template2")
+
+# cd("/Users/claudiaguenther/Documents/Studium/MEMS/SS2018/EnergyEconomics/Template2")
+cd("D:\\git\\EnergyEconomics\\EnergyEconomics\\Homework2")
 using JuliaDB
 using NamedArrays
 using Plots
@@ -9,6 +11,7 @@ using TransportModel
 ###############################################################################
 # Load data from csv files #
 ###############################################################################
+
 plant_data = loadtable("data/plant_data.csv")
 storage_data = loadtable("data/storage_data.csv")
 demand_data = loadtable("data/demand.csv")
@@ -49,16 +52,20 @@ NONDISP_TECH = ["Wind", "Solar"]
 
 PLANT_TECH = Dict()
 for tech in TECH
-    PLANT_TECH[tech] = convert(Array, select(filter(row-> row.technology == tech, plant_data), :plant))
+    PLANT_TECH[tech] = convert(Array, select(
+        filter(row-> row.technology == tech, plant_data), :plant))
 end
+
 PLANT_ZONE = Dict()
 for zone in ZONES
-    PLANT_ZONE[zone] = convert(Array, select(filter(row-> row.zone == zone, plant_data), :plant))
+    PLANT_ZONE[zone] = convert(Array, select(
+        filter(row-> row.zone == zone, plant_data), :plant))
 end
 
 STOR_ZONE = Dict()
 for zone in ZONES
-    STOR_ZONE[zone] = convert(Array, select(filter(row-> row.zone == zone, storage_data), :plant))
+    STOR_ZONE[zone] = convert(Array, select(
+        filter(row-> row.zone == zone, storage_data), :plant))
 end
 
 NONDISP_ZONES = Dict()
@@ -70,14 +77,16 @@ for tech in NONDISP_TECH, zone in ZONES
     NONDISP_ZONES[zone, tech] = plants
 end
 
-ZONE_PLANTS = Dict(collect(zip(columns(plant_data, :plant), columns(plant_data, :zone))))
+ZONE_PLANTS = Dict(collect(zip(columns(plant_data, :plant),
+    columns(plant_data, :zone))))
 
-
-TECH_PLANTS = Dict(collect(zip(columns(plant_data, :plant), columns(plant_data, :technology))))
+TECH_PLANTS = Dict(collect(zip(columns(plant_data, :plant),
+    columns(plant_data, :technology))))
 
 ###############################################################################
 # Save sets into a dict #
 ###############################################################################
+
 sets = Dict(
     "Tech" => TECH,
     "Plants" => PLANTS,
@@ -98,15 +107,16 @@ sets = Dict(
 ###############################################################################
 stor_max = NamedArray(select(storage_data, :capacity), (STOR,), ("Storage",))
 
-stor_g_max = NamedArray(select(storage_data, :generation), (STOR,), ("Storage",))
+stor_g_max = NamedArray(select(storage_data, :generation), (STOR,),
+    ("Storage",))
 
 hours = select(demand_data, 1)
 
 g_max = NamedArray(select(plant_data, :capacity), (PLANTS,), ("Plants",))
 
 
-demand_array = hcat([select(demand_data, :demand).* columns(zone_data, :demand_share)[i] for i in 1:length(ZONES)]...)
-
+demand_array = hcat([select(demand_data, :demand).* columns(zone_data,
+    :demand_share)[i] for i in 1:length(ZONES)]...)
 
 demand = NamedArray(demand_array, (hours,ZONES), ("Hours","Zone"))
 
@@ -119,27 +129,31 @@ ntc = NamedArray(ntc_array, (ZONES,ZONES), ("from_zone","to_zone"))
 # ntc *= 0.5 ## 50% Capacitys
 
 # Set ntc to zero
-ntc *= 0
-
+# ntc *= 0
 
 co2price = 14
-mc_tech = select(mc_data, :fuelcost) ./ select(mc_data, :efficiency) + select(mc_data, :sef) .* co2price + select(mc_data, :om)
+mc_tech = select(mc_data, :fuelcost) ./ select(mc_data, :efficiency)
+    + select(mc_data, :sef) .* co2price + select(mc_data, :om)
 mc_tech = NamedArray(mc_tech, (TECH,), ("tech",))
 
+mc = NamedArray([mc_tech[tech] for tech in columns(plant_data, :technology)],
+    (PLANTS,),("plant",))
 
-mc = NamedArray([mc_tech[tech] for tech in columns(plant_data, :technology)], (PLANTS,),("plant",))
+availability_wind_array = hcat([columns(wind_availability,
+    Symbol(z)) for z in ZONES]...)
 
-availability_wind_array = hcat([columns(wind_availability, Symbol(z)) for z in ZONES]...)
+availability_pv_array = hcat([columns(pv_availability,
+    Symbol(z)) for z in ZONES]...)
 
-availability_pv_array = hcat([columns(pv_availability, Symbol(z)) for z in ZONES]...)
-
-
-combined_avail_array = reshape(hcat(availability_wind_array, availability_pv_array),8760, 4, 2)
-availability = NamedArray(combined_avail_array, (hours, ZONES, ["Wind", "Solar"]), ("Hour", "Zone", "Technology"))
+combined_avail_array = reshape(hcat(availability_wind_array,
+    availability_pv_array),8760, 4, 2)
+availability = NamedArray(combined_avail_array, (hours, ZONES,
+    ["Wind", "Solar"]), ("Hour", "Zone", "Technology"))
 
 g_res_array = zeros(length(NONDISP), length(hours))
 for (i,plant) in enumerate(NONDISP), (j,hour) in enumerate(hours)
-    g_res_array[i, j] = availability[hour,ZONE_PLANTS[plant],TECH_PLANTS[plant]] .* g_max[plant]
+    g_res_array[i, j] = availability[hour, ZONE_PLANTS[plant],
+        TECH_PLANTS[plant]] .* g_max[plant]
 end
 
 g_res = NamedArray(g_res_array, (NONDISP, hours), ("Plants", "Hours"))

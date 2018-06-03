@@ -30,8 +30,6 @@ function transport_model(sets::Dict, param::Dict; timeset::UnitRange=1:8760, sol
     stor_g_max = param["stor_g_max"]
     ntc = param["ntc"]
 
-
-
     HOUR = collect(timeset)
 
     println("Building Model")
@@ -55,40 +53,37 @@ function transport_model(sets::Dict, param::Dict; timeset::UnitRange=1:8760, sol
         sum(mc[disp] * G[disp, hour] for disp in DISP, hour in HOUR)
         );
 
-        # Add zonal market clearing constraint for transport model
-        @constraint(transport_problem, Market_Clearing[zone=ZONES, hour=HOUR],
-                     sum(G[disp, hour] for disp in intersect(DISP , PLANT_ZONE[zone]))
-                   + sum(G_RES[nondisp, hour] for nondisp in intersect(NONDISP , PLANT_ZONE[zone]))
-                   + sum(G_stor[stor, hour] for stor in intersect(STOR , STOR_ZONE[zone]))
-                    ==
-                    demand[hour, zone]
-                   - sum(EX[from_zone, zone, hour] for from_zone in ZONES)
-                   + sum(EX[zone, to_zone, hour] for to_zone in ZONES)
-                   + sum(D_stor[stor, hour] for stor in intersect(STOR , STOR_ZONE[zone])));
+    # Add zonal market clearing constraint for transport model
+    @constraint(transport_problem, Market_Clearing[zone=ZONES, hour=HOUR],
+        sum(G[disp, hour] for disp in intersect(DISP , PLANT_ZONE[zone]))
+        + sum(G_RES[nondisp, hour] for nondisp in intersect(NONDISP , PLANT_ZONE[zone]))
+        + sum(G_stor[stor, hour] for stor in intersect(STOR , STOR_ZONE[zone]))
+        ==
+        demand[hour, zone]
+        - sum(EX[from_zone, zone, hour] for from_zone in ZONES)
+        + sum(EX[zone, to_zone, hour] for to_zone in ZONES)
+        + sum(D_stor[stor, hour] for stor in intersect(STOR , STOR_ZONE[zone])));
 
     @constraint(transport_problem, NTC[to_zone=ZONES, from_zone=ZONES,hour=HOUR],
-                            EX[from_zone, to_zone, hour] <= ntc[from_zone, to_zone]);
+        EX[from_zone, to_zone, hour] <= ntc[from_zone, to_zone]);
 
     @constraint(transport_problem, Max_Generation[disp=DISP, hour=HOUR],
-    G[disp, hour] <= g_max[disp] );
+        G[disp, hour] <= g_max[disp] );
 
     @constraint(transport_problem, Curtailment[nondisp=NONDISP, hour=HOUR],
-    G_RES[nondisp, hour] <= g_res[nondisp, hour]);
+        G_RES[nondisp, hour] <= g_res[nondisp, hour]);
 
     @constraint(transport_problem, Storage_Level[sto=STOR, hour=HOUR; hour != HOUR[1]],
-    L[sto, hour] == L[sto, hour-1] + 0.88*D_stor[sto, hour] - G_stor[sto, hour] );
-
+        L[sto, hour] == L[sto, hour-1] + 0.88*D_stor[sto, hour] - G_stor[sto, hour] );
 
     @constraint(transport_problem, Max_Storage_Level[sto=STOR, hour=HOUR],
-    L[sto, hour] <= stor_max[sto] );
-
+        L[sto, hour] <= stor_max[sto] );
 
     @constraint(transport_problem, Max_Storage_Generation[sto=STOR, hour=HOUR],
-    G_stor[sto, hour] <= stor_g_max[sto] );
-
+        G_stor[sto, hour] <= stor_g_max[sto] );
 
     @constraint(transport_problem, Max_Storage_Withdraw[sto=STOR, hour=HOUR],
-    D_stor[sto, hour] <= stor_g_max[sto]);
+        D_stor[sto, hour] <= stor_g_max[sto]);
 
     println("Start solving")
 

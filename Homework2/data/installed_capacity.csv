@@ -1,0 +1,10 @@
+Technology,type,category,North,East,West,South
+Nuclear,disp,conventional,3000,0,0,6000
+Lignite,disp,conventional,2000,10000,4000,0
+Hard coal,disp,conventional,6000,8000,10000,0
+Natural gas,disp,conventional,3000,2000,4000,8000
+Biomass,disp,renewable,2000,4000,2000,4000
+Wind,nondisp,renewable,30000,15000,12000,2000
+Solar,nondisp,renewable,5000,15000,10000,25000
+PSP,capacity,storage,12000,16000,4000,20000
+PSP,generation,storage,2000,3000,500,4000

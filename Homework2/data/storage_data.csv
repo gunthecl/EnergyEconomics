@@ -1,0 +1,3 @@
+plant,technology,type,zone,capacity,generation
+S1,PSP,storage,East,10000, 2000
+S2,PSP,storage,South,10000, 2000
