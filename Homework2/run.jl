@@ -1,6 +1,6 @@
 
 #cd("/Users/claudiaguenther/Documents/EnergyEconomics/Homework2")
-#cd("D:\\git\\EnergyEconomics\\EnergyEconomics\\Homework2")
+#cd("D:\\git\\EnergyEconomics\\Homework2")
 using JuliaDB
 using NamedArrays
 using Plots
