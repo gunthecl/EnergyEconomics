@@ -1,6 +1,6 @@
 
-# cd("/Users/claudiaguenther/Documents/Studium/MEMS/SS2018/EnergyEconomics/Template2")
-cd("D:\\git\\EnergyEconomics\\EnergyEconomics\\Homework2")
+#cd("/Users/claudiaguenther/Documents/EnergyEconomics/Homework2")
+#cd("D:\\git\\EnergyEconomics\\EnergyEconomics\\Homework2")
 using JuliaDB
 using NamedArrays
 using Plots
@@ -129,7 +129,7 @@ ntc = NamedArray(ntc_array, (ZONES,ZONES), ("from_zone","to_zone"))
 # ntc *= 0.5 ## 50% Capacitys
 
 # Set ntc to zero
-# ntc *= 0
+ntc *= 0
 
 co2price = 14
 mc_tech = select(mc_data, :fuelcost) ./ select(mc_data, :efficiency)
@@ -231,3 +231,6 @@ dispatch_plot = plot_dispatch_per_zone(results)
 # Use when you have implemented the zonal energy balance
 price_plot = plot(results["Price"]', label=ZONES, width=3)
 #savefig(price_plot, "Price_plot3a.pdf")
+
+
+storage_level = plot(results["Storage"]', label=ZONES, width=3)
