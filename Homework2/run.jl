@@ -126,13 +126,13 @@ ntc = NamedArray(ntc_array, (ZONES,ZONES), ("from_zone","to_zone"))
 
 #### NTC Scaling
 
-ntc *= 10000 ## Unlimited
+# ntc *= 100000 ## Unlimited
 
 
-# ntc *= 0.5 ## 50% Capacitys
+ntc *= 0.5 ## 50% Capacitys
 
 # Set ntc to zero
-#ntc *= 0
+# ntc *= 0
 
 co2price = 14
 mc_tech = select(mc_data, :fuelcost) ./ select(mc_data, :efficiency)
