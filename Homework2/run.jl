@@ -126,10 +126,13 @@ ntc = NamedArray(ntc_array, (ZONES,ZONES), ("from_zone","to_zone"))
 
 #### NTC Scaling
 
+ntc *= 10000 ## Unlimited
+
+
 # ntc *= 0.5 ## 50% Capacitys
 
 # Set ntc to zero
-ntc *= 0
+#ntc *= 0
 
 co2price = 14
 mc_tech = select(mc_data, :fuelcost) ./ select(mc_data, :efficiency)
@@ -233,4 +236,6 @@ price_plot = plot(results["Price"]', label=ZONES, width=3)
 #savefig(price_plot, "Price_plot3a.pdf")
 
 
-storage_level = plot(results["Storage"]', label=ZONES, width=3)
+storage_level = plot(results["Storage_Level"]', label=STOR, width=3)
+storage_demand = plot(results["Storage_Demand"]', label=STOR, width=3)
+storage_gen = plot(results["Storage_Gen"]', label=STOR, width=3)

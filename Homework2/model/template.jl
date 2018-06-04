@@ -93,7 +93,10 @@ function transport_model(sets::Dict, param::Dict; timeset::UnitRange=1:8760, sol
 
     results["Generation"] = NamedArray(getvalue(G).innerArray, (DISP, HOUR), ("Plant", "Hour"))
     results["Generation_Res"] = NamedArray(getvalue(G_RES).innerArray, (NONDISP, HOUR), ("Plant", "Hour"))
-    results["Storage"] = NamedArray(getvalue(G_stor).innerArray, (STOR, HOUR), ("Plant", "Hour"))
+    results["Storage_Gen"] = NamedArray(getvalue(G_stor).innerArray, (STOR, HOUR), ("Plant", "Hour"))
+    results["Storage_Level"] = NamedArray(getvalue(L).innerArray, (STOR, HOUR), ("Plant", "Hour"))
+    results["Storage_Demand"] = NamedArray(getvalue(D_stor).innerArray, (STOR, HOUR), ("Plant", "Hour"))
+
 
     # Use when you have implemented the zonal energy balance
     results["Price"] = NamedArray(getdual(Market_Clearing).innerArray, (ZONES, HOUR), ("Zone", "Hour"))
