@@ -1,6 +1,7 @@
 using JuMP
 using NamedArrays
-using Cbc
+using OSQP
+using Ipopt
 
 NODES = collect(1:6)
 SLACK = 6
@@ -28,7 +29,7 @@ b = Dict(collect(zip(NODES, [0.05;0.05;-0.05;0.025;-0.1;-0.1])))
 
 cap = Dict("1-6" => 200, "2-5" => 250)
 
-Ehrenmann = Model(solver=CbcSolver())
+Ehrenmann = Model(solver=IpoptSolver())
 @variables Ehrenmann begin
     Q[NODES] >= 0
     INJ[NODES]
@@ -50,6 +51,8 @@ end
 
 solve(Ehrenmann)
 results = Dict()
-results["objective"] = getobjectivevalue(Ehrenmann)
-
-results
+results["objective"]    = getobjectivevalue(Ehrenmann)
+results["quantity"]     = NamedArray(getvalue(Q).innerArray)
+results["prices"]       = NamedArray(getdual(EnergyBalance).innerArray)
+results["netinjection"] = getvalue(INJ).innerArray
+results["flows"]        = ptdf_array*results["netinjection"]
