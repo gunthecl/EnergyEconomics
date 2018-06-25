@@ -43,40 +43,57 @@ The market price is defined as the inversed demand function (demand nodes) or as
 f) Use the result Dictionary to get access the model results and return all values which
 are used in the result table in the paper plus the price by dual as a reference.
 
+We can derive prices based on marginal costs/marginal utility in each node. This equal a + b*q for all nodes. Equivalently, we can derive prices based on the dual of the Energy Balace. Resulting line flows can be obtained by multiplying the PTDF matrix with the net injection vector. 
+
+results = Dict()
 results["objective"]    = getobjectivevalue(Ehrenmann)
 results["quantity"]     = NamedArray(getvalue(Q).innerArray)
-results["netinjection"] = NamedArray(getvalue(INJ).innerArray)
+results["prices_dual"]  = NamedArray(getdual(EnergyBalance).innerArray)
+results["prices_marg"] = [10;15;37.5;42.5;75;80] +
+                         [0.05;0.05;-0.05;0.025;-0.1;-0.1].*results["quantity"]
+results["netinjection"] = getvalue(INJ).innerArray
 results["flows"]        = ptdf_array*results["netinjection"]
-results["prices"]       = NamedArray(getdual(EnergyBalance).innerArray)
 
-price: 35 in all nodes -> in constrast to Smeers, p. 18!
+
+Price: uniform price is 35 in all nodes, except for node 4 where it is 42.5 (and not electricity generated therefore) based on marginal costs/utility. Local marginal prices based on dual is 35 for all nodes.
+
+
 quantities (node 1,2,3,4,5,6): 500, 400, 50, 0, 400, 450
 flows on lines ("1-3","1-2","2-3","1-6","2-5","5-6","4-5","4-6"):
 38.54,27.085,-11.46,434.375,415.625, 10.415,5.21,  5.21
 
--> there is a mistake! order of line is different (why has node 4 no inflows but outflows though quantity is zero)?
+-> there is a mistake! order of line is different (why has node 4 no inflows but outflows though quantity is zero)? Write an email to Richard
+
+-> is there another way to get prices?
 
 g) Run the template. To which result from the paper does this problem formulation
 correspond?
 
-This corresponds to the one zone setup of displayed in "Table 10: One Zone" on page 18. We have the same nodal price since we do not impose any capacity constraints on lines. 
-
+This corresponds to the one zone setup of displayed in "Table 10: One Zone" on page 18. We have the same nodal price for all nodes since we do not impose any capacity constraints on lines. 
 
 ### Task 2: Equations and Results:
 a) Based on the results of the template model, will this market price be equal to
 the dual on the Energy Balance. Explain possible differences in terms of the
 formulation or optimization problems in general.
 
--> this is probably the reason for price difference with Smeers
+The price derived from marginal costs/utility is equal to the duals from the Energy balance except for node 4 (where the producer is driven out of the market). 
+Should this be the case already? Question b) suggests otherwise....
+
+???? 
 
 b) Implement two constraints which enforce upper- and lower limits in line flows.
 Make sure this constraint only applies to the lines "1-6" and "2-5". This should
 correspond to the results from Table 4. Explain why the market- and dual price
 are now equivalent.
 
+We implement the constraints in accordance with the approach by Ehrenmann and Smeers (p.11). 
+The flow on a line can be calculated via the sum of PTDF coefficient times the net injection.
+(Why two contraints? )
+
 c) Implement a constraint that forces the market prices to be equal to a variable
 price for all nodes within a price zone. You can use a similar approach as in the
 plants-in-zone dictionary from the transport model.
+
 
 d) Use this constraint to implement configurations 2.1 and 2.2 from the paper. Confirm the results with Tables 11 and 12. Compare the resulting prices from the
 definition and the ones by the dual.

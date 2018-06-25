@@ -1,6 +1,5 @@
 using JuMP
 using NamedArrays
-using OSQP
 using Ipopt
 
 NODES = collect(1:6)
@@ -33,6 +32,7 @@ Ehrenmann = Model(solver=IpoptSolver())
 @variables Ehrenmann begin
     Q[NODES] >= 0
     INJ[NODES]
+    FLOWS
 end
 
 @objective(Ehrenmann, Max,
@@ -53,6 +53,8 @@ solve(Ehrenmann)
 results = Dict()
 results["objective"]    = getobjectivevalue(Ehrenmann)
 results["quantity"]     = NamedArray(getvalue(Q).innerArray)
-results["prices"]       = NamedArray(getdual(EnergyBalance).innerArray)
+results["prices_dual"]  = NamedArray(getdual(EnergyBalance).innerArray)
+results["prices_marg"] = [10;15;37.5;42.5;75;80] +
+                         [0.05;0.05;-0.05;0.025;-0.1;-0.1].*results["quantity"]
 results["netinjection"] = getvalue(INJ).innerArray
-results["flows"]        = ptdf_array*results["netinjection"]
+results["flows"]        = ptdf*results["netinjection"]
