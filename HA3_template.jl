@@ -59,7 +59,7 @@ end
     sum(INJ[node] for node in setdiff(NODES, SLACK)) == -INJ[SLACK]
     );
 
-@defConstrRef CapacityConstraints[1:length(keys(cap))*2]
+@constraintref CapacityConstraints[1:length(keys(cap))*2]
 i = 1
 for line in LINES
     if line in keys(cap)
