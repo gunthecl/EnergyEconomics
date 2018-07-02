@@ -32,7 +32,6 @@ Ehrenmann = Model(solver=GurobiSolver())
 @variables Ehrenmann begin
     Q[NODES] >= 0
     INJ[NODES]
-    FLOWS
     PRICE[keys(PRICE_ZONES)]
 end
 
@@ -52,7 +51,7 @@ end
     sum(INJ[node] for node in setdiff(NODES, SLACK)) == -INJ[SLACK]
     );
 
-@defConstrRef CapacityConstraints[1:length(keys(cap))*2]
+@constraintref CapacityConstraints[1:length(keys(cap))*2]
 i = 1
 for line in LINES
     if line in keys(cap)
@@ -67,7 +66,7 @@ for line in LINES
     end
 end
 
-@defConstrRef PriceConstraints[1:length(NODES)]
+@constraintref PriceConstraints[1:length(NODES)]
 i = 1
 for zone in keys(PRICE_ZONES)
     for node in NODES

@@ -79,16 +79,11 @@ formulation or optimization problems in general.
 The price derived from marginal costs/utility is equal to the duals from the Energy balance except for node 4 (where the producer is driven out of the market).
 Should this be the case already? Question b) suggests otherwise....
 
-????
-
 b) Implement two constraints which enforce upper- and lower limits in line flows.
 Make sure this constraint only applies to the lines "1-6" and "2-5". This should
 correspond to the results from Table 4. Explain why the market- and dual price
 are now equivalent.
 
-We implement the constraints in accordance with the approach by Ehrenmann and Smeers (p.11).
-The flow on a line can be calculated via the sum of PTDF coefficient times the net injection.
-(Why two contraints? )
 
 c) Implement a constraint that forces the market prices to be equal to a variable
 price for all nodes within a price zone. You can use a similar approach as in the
