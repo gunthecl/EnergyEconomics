@@ -8,11 +8,11 @@ a) From line 14 in the template you and the PTDF matrix of the network. Explain
 what the PTDF matrix does, what assumptions and information is used to derive
 it.
 
-The power transfer distribution factors (PTDF) matrix gives the node-line sensitivity of the modelled power network. These sensitivities explain how power flows change if power injection between nodes is shifted, resulting in different line flows. The actual power flow in the modelled network is nonlinear and can be simplified and approximated by the DC load flow model given some assumptions. 
+The power transfer distribution factors (PTDF) matrix gives the node-line sensitivity of the modelled power network. These sensitivities explain how power flows change if power injection between nodes is shifted, resulting in different line flows. The actual power flow in the modelled network is nonlinear and can be simplified and approximated by the DC load flow model given some assumptions.
 Specifically, the following assumptions are made (EW-MOD lecture, 28.05.2018, slide 8):
  - No reactive power flows, i.e. only consider active power
- - No active power losses 
- - Small Voltage angles 
+ - No active power losses
+ - Small Voltage angles
  - Flat voltage profile / equal voltage amplitude all nodes
 
 To derive the PTDF matrix, we need to know the the incidence matrix, describing which nodes are connected to which lines and each line's susceptance. Unfortunately, the PTDF for equation for nodal balance is linear dependent and results in a non-invertible matrix. We thus work with a reduced incidence matrix by defining a slack node. This slack node is removed from the incidence matrix and assumed to balance all other grid injections. Its PTDF values are set to zero, meaning that changing its net injection will not affect line flows. The PTDF can then be derived as a product of the Line Susceptance Matrix and the inverse of the Node Susceptance Matrix.
@@ -21,9 +21,9 @@ b) Describe the Objective function of the problem and distinguish the different 
 sets of nodes.
 
 The objective function maximizes total welfare, which is the sum of consumer (demand) and producer (supply) surplus. Since producer's revenues represent costs to consumers, the maximization problem can be reduced to the difference between gross consumer surplus and total costs.  
-Ehrenmann and Smeers choose symmetric demand and marginal cost function that include a linear (a) and quadratic (b) term. 
+Ehrenmann and Smeers choose symmetric demand and marginal cost function that include a linear (a) and quadratic (b) term.
 
-Generators are located at node 1, 2 and 4 and consumers at nodes 3, 5 and 6. Node 6 is defined as slack node. 
+Generators are located at node 1, 2 and 4 and consumers at nodes 3, 5 and 6. Node 6 is defined as slack node.
 
 c) State the problem type and an available solver to solve it.
 The problem we are faced with is a quadratic problem. We therefore chose the IpoptSolver from the open source package Ipopt to solve it. The non-differentiation between linear and quadratic solvers on https://www.juliaopt.org/ is not very useful since it falsely suggests that linear solvers like Clp or Cbc can also deal with quadratic problems.
@@ -43,7 +43,7 @@ The market price is defined as the inversed demand function (demand nodes) or as
 f) Use the result Dictionary to get access the model results and return all values which
 are used in the result table in the paper plus the price by dual as a reference.
 
-We can derive prices based on marginal costs/marginal utility in each node. This equal a + b*q for all nodes. Equivalently, we can derive prices based on the dual of the Energy Balace. Resulting line flows can be obtained by multiplying the PTDF matrix with the net injection vector. 
+We can derive prices based on marginal costs/marginal utility in each node. This equal a + b*q for all nodes. Equivalently, we can derive prices based on the dual of the Energy Balace. Resulting line flows can be obtained by multiplying the PTDF matrix with the net injection vector.
 
 results = Dict()
 results["objective"]    = getobjectivevalue(Ehrenmann)
@@ -69,24 +69,24 @@ flows on lines ("1-3","1-2","2-3","1-6","2-5","5-6","4-5","4-6"):
 g) Run the template. To which result from the paper does this problem formulation
 correspond?
 
-This corresponds to the one zone setup of displayed in "Table 10: One Zone" on page 18. We have the same nodal price for all nodes since we do not impose any capacity constraints on lines. 
+This corresponds to the one zone setup of displayed in "Table 10: One Zone" on page 18. We have the same nodal price for all nodes since we do not impose any capacity constraints on lines.
 
 ### Task 2: Equations and Results:
 a) Based on the results of the template model, will this market price be equal to
 the dual on the Energy Balance. Explain possible differences in terms of the
 formulation or optimization problems in general.
 
-The price derived from marginal costs/utility is equal to the duals from the Energy balance except for node 4 (where the producer is driven out of the market). 
+The price derived from marginal costs/utility is equal to the duals from the Energy balance except for node 4 (where the producer is driven out of the market).
 Should this be the case already? Question b) suggests otherwise....
 
-???? 
+????
 
 b) Implement two constraints which enforce upper- and lower limits in line flows.
 Make sure this constraint only applies to the lines "1-6" and "2-5". This should
 correspond to the results from Table 4. Explain why the market- and dual price
 are now equivalent.
 
-We implement the constraints in accordance with the approach by Ehrenmann and Smeers (p.11). 
+We implement the constraints in accordance with the approach by Ehrenmann and Smeers (p.11).
 The flow on a line can be calculated via the sum of PTDF coefficient times the net injection.
 (Why two contraints? )
 

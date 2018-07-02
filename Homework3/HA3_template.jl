@@ -1,6 +1,6 @@
-using JuMP
 using NamedArrays
-using Ipopt
+using JuMP
+using Gurobi
 
 NODES = collect(1:6)
 SLACK = 6
@@ -8,7 +8,7 @@ DEM_NODES = [3,5,6]
 SUP_NODES = [1,2,4]
 LINES = ["1-3","1-2","2-3","1-6","2-5","5-6","4-5","4-6"]
 
-PRICE_ZONES = Dict("Z1" => [1,3], "Z2" => [4,5])
+PRICE_ZONES = Dict("Z1" => [1,3], "Z2" => [4,5], "Z3" => [2], "Z4" => [6])
 
 ptdf_array =[
  0.125  -0.1667  -0.5208  -0.0208  -0.0417  0.0;
@@ -28,16 +28,19 @@ b = Dict(collect(zip(NODES, [0.05;0.05;-0.05;0.025;-0.1;-0.1])))
 
 cap = Dict("1-6" => 200, "2-5" => 250)
 
-Ehrenmann = Model(solver=IpoptSolver())
+Ehrenmann = Model(solver=GurobiSolver())
 @variables Ehrenmann begin
     Q[NODES] >= 0
     INJ[NODES]
     FLOWS
+    PRICE[keys(PRICE_ZONES)]
 end
 
 @objective(Ehrenmann, Max,
-    sum((a[dem_node] + 0.5*b[dem_node]*Q[dem_node])*Q[dem_node] for dem_node in DEM_NODES)
-    - sum((a[sup_node] + 0.5*b[sup_node]*Q[sup_node])*Q[sup_node] for sup_node in SUP_NODES)
+    sum((a[dem_node] + 0.5*b[dem_node]*Q[dem_node])*Q[dem_node]
+    for dem_node in DEM_NODES)
+    - sum((a[sup_node] + 0.5*b[sup_node]*Q[sup_node])*Q[sup_node]
+    for sup_node in SUP_NODES)
     );
 
 @constraint(Ehrenmann, EnergyBalance[node=NODES],
@@ -49,12 +52,42 @@ end
     sum(INJ[node] for node in setdiff(NODES, SLACK)) == -INJ[SLACK]
     );
 
+@defConstrRef CapacityConstraints[1:length(keys(cap))*2]
+i = 1
+for line in LINES
+    if line in keys(cap)
+        CapacityConstraints[i] = @constraint(Ehrenmann,
+            sum(ptdf[line, node]*INJ[node] for node in NODES) <= cap[line]
+        );
+        i = i + 1
+        CapacityConstraints[i] = @constraint(Ehrenmann,
+            sum(ptdf[line, node]*INJ[node] for node in NODES) >= -cap[line]
+        );
+        i = i + 1
+    end
+end
+
+@defConstrRef PriceConstraints[1:length(NODES)]
+i = 1
+for zone in keys(PRICE_ZONES)
+    for node in NODES
+        if node in PRICE_ZONES[zone]
+        PriceConstraints[i] = @constraint(Ehrenmann,
+            PRICE[zone] == a[node]+b[node].*Q[node]
+        );
+        i = i + 1
+    end
+end
+end
+
 solve(Ehrenmann)
 results = Dict()
 results["objective"]    = getobjectivevalue(Ehrenmann)
 results["quantity"]     = NamedArray(getvalue(Q).innerArray)
 results["prices_dual"]  = NamedArray(getdual(EnergyBalance).innerArray)
-results["prices_marg"] = [10;15;37.5;42.5;75;80] +
+# a+b*q, as seen in section 2.2 on page 6
+results["prices_marg"]  = [10;15;37.5;42.5;75;80] +
                          [0.05;0.05;-0.05;0.025;-0.1;-0.1].*results["quantity"]
+results["price"]        = NamedArray(getvalue(PRICE).innerArray)
 results["netinjection"] = getvalue(INJ).innerArray
 results["flows"]        = ptdf*results["netinjection"]
