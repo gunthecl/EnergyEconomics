@@ -8,7 +8,7 @@ DEM_NODES = [3,5,6]
 SUP_NODES = [1,2,4]
 LINES = ["1-3","1-2","2-3","1-6","2-5","5-6","4-5","4-6"]
 
-PRICE_ZONES = Dict("Z1" => [1,2,3], "Z2" => [4,5,6])#, "Z3" => [2], "Z4" => [6])
+PRICE_ZONES = Dict("Z1" => [1,3], "Z2" => [4,5], "Z3" => [2], "Z4" => [6])
 
 NODES_IN_ZONE = Dict()
 for node in NODES, zone in keys(PRICE_ZONES)
