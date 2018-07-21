@@ -1,0 +1,59 @@
+# Homework 4
+
+**Due Date**: July 24
+
+## Task 1: Expand the model:
+
+The cost parameters we use represent a 2020 perspective and are taken from @pape2014roadmap. This source has been used in dispatch and investment modelling for storage analysis for example in @zerrahn2015greenfield. Additionally to the pumped-hydro storage, a mid-term storage option, we include a short-term storage technology, lithium-ion batteries, and a long-term option, and power-to-gas. 
+
+b) 
+Our csv input file ocntains the following parameters:
+
+technology	oc_power	oc_storage	lifetime	efficiency
+PSP	  1100000	  10000	80	0.8
+LITH	35000  	 187000	10	0.90
+P2G	  1700000    	200	15	0.38
+
+We calculate annuity via 
+
+annuity_oc_power = map(row-> row.oc_power * (i+1)^row.lifetime / (((1+i)^row.lifetime)-1), storage_table)
+annuity_oc_energy = map(row-> row.oc_storage * (i+1)^row.lifetime / (((1+i)^row.lifetime)-1), storage_table)
+
+In order to avoid a double charge for an investment into storages, we change the objective function to 
+
+    @objective(Invest, Min,
+
+        sum(mc[tech] * G[hour,tech] * 8760/length(HOUR) for tech in TECHNOLOGY, hour in HOUR)
+
+        + sum(annuity[tech] * CAP[tech] for tech in TECHNOLOGY)
+        + 0.5 * sum(annuity_oc_power[stor] * CAP_ST[stor] for stor in STOR)
+        + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST[stor] for stor in STOR) )
+
+
+c) Run the model for shares of 70 %, 80 %, 90 %, and 100 %. Submit a plot from
+the given model and one plot after you successfully implemented storages. How
+does the investment into generation capacity change? What happens with the
+curtailment?
+
+
+d) Create your own plot showing the investment into storage power and storage ca-
+pacity. How much energy is stored during the course of the year? How much
+energy was lost due to storage efficiency?
+
+
+Sources
+
+
+@article{pape2014roadmap,
+  title={Roadmap Speicher-Bestimmung des Speicherbedarfs in Deutschland im europ{\"a}ischen Kontext und Ableitung von technisch-{\"o}konomischen sowie rechtlichen Handlungsempfehlungen f{\"u}r die Speicherf{\"o}rderung},
+  author={Pape, Carsten and Gerhardt, Norman and H{\"a}rtel, Philipp and Scholz, Angela and Schwinn, Rainer and Drees, Tim and Maaz, Andreas and Sprey, Jens and Breuer, Christopher and Moser, Albert and others},
+  journal={Fraunhofer IWES, Kassel},
+  year={2014}
+}
+
+@article{zerrahn2015greenfield,
+  title={A Greenfield model to evaluate long-run power storage requirements for high shares of renewables},
+  author={Zerrahn, Alexander and Schill, Wolf-Peter},
+  year={2015}
+}
+
