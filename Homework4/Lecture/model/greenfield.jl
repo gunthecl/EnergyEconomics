@@ -72,7 +72,7 @@ function invest(res_share::Int, solver=error("Set a solver!"))
 
 
     for s in STOR
-        JuMP.fix(G_stor[s, HOUR[1]], 0)
+        JuMP.fix(G_stor[HOUR[1], s], 0)
     end
 
 
@@ -82,51 +82,46 @@ function invest(res_share::Int, solver=error("Set a solver!"))
 
         + sum(annuity[tech] * CAP[tech] for tech in TECHNOLOGY)
         + 0.5 * sum(annuity_oc_power[stor] * CAP_ST[stor] for stor in STOR)
-        + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST[stor] for stor in STOR) )
+        + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST[stor] for stor in STOR) );
 
 
     @constraint(Invest, EnergyBalance[hour=HOUR],
 
         sum(G[hour,tech] for tech in TECHNOLOGY)
-
         ==
-
-        demand[hour])
+        demand[hour]);
 
     @constraint(Invest, MaxGeneration[hour=HOUR, disp=DISP],
 
-        G[hour,disp] <= CAP[disp])
+        G[hour,disp] <= CAP[disp]);
 
 
     @constraint(Invest, MaxInfeed[hour=HOUR, nondisp=NONDISP],
         G[hour,nondisp] + CU[hour,nondisp]
         ==
-        avail[hour,nondisp] * CAP[nondisp])
+        avail[hour,nondisp] * CAP[nondisp]);
 
     @constraint(Invest, ResShare,
 
         sum(G[hour,nondisp] for hour in HOUR, nondisp in NONDISP)
-
         ==
-
-        res_share/100 *
-        sum(demand[hour] for  hour in HOUR) )
+        res_share/100 * sum(demand[hour] for  hour in HOUR) );
 
     @constraint(Invest, Storage_Level[stor=STOR, hour=HOUR; hour != HOUR[1]],
-            L[stor, hour] ==  L[stor, hour-1] + effic[stor]*D_stor[stor, hour]
-            - G_stor[stor, hour])
+            L[hour, stor] ==  L[hour-1, stor] + effic[stor]*D_stor[hour, stor]
+            - G_stor[hour, stor]);
 
     @constraint(Invest, Free_Lunch[stor=STOR],
-            L[stor, HOUR[1]] ==  L[stor, HOUR[end]])
+            L[HOUR[1], stor ] ==  L[HOUR[end], stor]);
 
     @constraint(Invest, Max_Storage_Level[stor=STOR, hour=HOUR],
-            L[stor, hour] <= CAP_ST[stor] );
+            L[hour, stor] <= CAP_ST[stor] );
 
     @constraint(Invest, Max_Storage_Generation[stor=STOR, hour=HOUR],
-                G_stor[stor, hour] <= CAP_ST[stor]);
+                G_stor[hour, stor] <= CAP_ST[stor]);
 
     @constraint(Invest, Max_Storage_Withdraw[stor=STOR, hour=HOUR],
-                D_stor[stor, hour] <= CAP_ST[stor]);
+                D_stor[hour, stor] <= CAP_ST[stor]);
 
 
 
@@ -162,7 +157,7 @@ len_stor = length(STOR)
 capacity = zeros(len_tech,nr_scenario)
 generation = zeros(len_tech,nr_scenario)
 curtailment = zeros(nr_scenario)
-storage    = zeros(len_stor)
+storage    = zeros(len_stor, nr_scenario)
 
 for (i,share) in enumerate(scenario)
     println("Calculating scenario with RES share $share %")
