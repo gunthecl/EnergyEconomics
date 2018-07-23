@@ -86,10 +86,11 @@ function invest(res_share::Int, solver=error("Set a solver!"))
 
 
     @constraint(Invest, EnergyBalance[hour=HOUR],
-
         sum(G[hour,tech] for tech in TECHNOLOGY)
+        + sum(G_stor[hour, stor] for stor in STOR)
         ==
-        demand[hour]);
+        demand[hour]
+        + sum(D_stor[hour, stor] for stor in STOR));
 
     @constraint(Invest, MaxGeneration[hour=HOUR, disp=DISP],
 
