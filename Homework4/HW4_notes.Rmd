@@ -4,15 +4,16 @@
 
 ## Task 1: Expand the model:
 
-The cost parameters we use represent a 2020 perspective and are taken from @pape2014roadmap. This source has been used in dispatch and investment modelling for storage analysis for example in @zerrahn2015greenfield. Additionally to the pumped-hydro storage, a mid-term storage option, we include a short-term storage technology, lithium-ion batteries, and a long-term option, and power-to-gas. 
+The cost parameters we use represent a 2050 perspective and are taken from @pape2014roadmap and @energiewende2014stromspeicher. These sources have been used in dispatch and investment modelling for storage analysis for example in @zerrahn2015greenfield. Additionally to the pumped-hydro storage, a mid-term storage option, we include a short-term storage technology, lithium-ion batteries, and a long-term option, and power-to-gas. 
+Following @zerrahn2015greenfield, we assume a 22,5 lifetime for pumped-hydro storage (mean of electrolysis and reconversion lifetime).
 
 b) 
 Our csv input file ocntains the following parameters:
 
 technology	oc_power	oc_storage	lifetime	efficiency
-PSP	  1100000	  10000	80	0.8
-LITH	35000  	 187000	10	0.90
-P2G	  1700000    	200	15	0.38
+PSP	  1100000	  10000	80	    0.8
+LITH	35000  	 150000	20	    0.92
+P2G	  1700000    	200	22,5	0.38
 
 We calculate annuity via 
 
@@ -42,6 +43,13 @@ energy was lost due to storage efficiency?
 
 
 Sources
+
+@article{energiewende2014stromspeicher,
+  title={Stromspeicher in der Energiewende-Untersuchung zum Bedarf an neuen Stromspeichern in Deutschland f{\"u}r den Erzeugungsausgleich, Systemdienst-leistungen und im Verteilnetz},
+  author={Energiewende, Agora},
+  journal={Berlin, Sep},
+  year={2014}
+}
 
 
 @article{pape2014roadmap,

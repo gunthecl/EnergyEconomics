@@ -13,7 +13,7 @@ availability_table = loadtable("data/availability.csv", indexcols=1)
 
 TECHNOLOGY = Array(select(costs_table, :Technology))
 NONDISP = string.(colnames(availability_table)[2:end])
-DISP = setdiff(TECHNOLOGY, NONDISP)
+DISP = setdiff(TECHNOLOGY, NONDISP) 
 STOR = Array(select(storage_table, :technology))
 
 
@@ -65,7 +65,8 @@ function invest(res_share::Int, solver=error("Set a solver!"))
     @variable(Invest, G[HOUR,TECHNOLOGY] >= 0)
     @variable(Invest, CU[HOUR,NONDISP] >= 0)
     @variable(Invest, CAP[TECHNOLOGY] >= 0)
-    @variable(Invest, CAP_ST[STOR] >= 0)
+    @variable(Invest, CAP_ST_E[STOR] >= 0) # Installed capacity storage energy
+    @variable(Invest, CAP_ST_P[STOR] >= 0) # Installed capacity storage power
     @variable(Invest, L[HOUR, STOR] >= 0) #current storage level
     @variable(Invest, D_stor[HOUR, STOR] >= 0) #consumption from storage)
     @variable(Invest, G_stor[HOUR, STOR] >= 0) #generation from storage)
@@ -81,15 +82,15 @@ function invest(res_share::Int, solver=error("Set a solver!"))
         sum(mc[tech] * G[hour,tech] * 8760/length(HOUR) for tech in TECHNOLOGY, hour in HOUR)
 
         + sum(annuity[tech] * CAP[tech] for tech in TECHNOLOGY)
-        + 0.5 * sum(annuity_oc_power[stor] * CAP_ST[stor] for stor in STOR)
-        + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST[stor] for stor in STOR) );
+        + 0.5 * sum(annuity_oc_power[stor] * CAP_ST_P[stor] for stor in STOR)
+        + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST_E[stor] for stor in STOR) );
 
 
     @constraint(Invest, EnergyBalance[hour=HOUR],
         sum(G[hour,tech] for tech in TECHNOLOGY)
         + sum(G_stor[hour, stor] for stor in STOR)
         ==
-        demand[hour]
+        demand[hour] +
         + sum(D_stor[hour, stor] for stor in STOR));
 
     @constraint(Invest, MaxGeneration[hour=HOUR, disp=DISP],
@@ -116,13 +117,13 @@ function invest(res_share::Int, solver=error("Set a solver!"))
             L[HOUR[1], stor ] ==  L[HOUR[end], stor]);
 
     @constraint(Invest, Max_Storage_Level[stor=STOR, hour=HOUR],
-            L[hour, stor] <= CAP_ST[stor] );
+            L[hour, stor] <= CAP_ST_E[stor] );
 
     @constraint(Invest, Max_Storage_Generation[stor=STOR, hour=HOUR],
-                G_stor[hour, stor] <= CAP_ST[stor]);
+                G_stor[hour, stor] <= CAP_ST_P[stor]);
 
     @constraint(Invest, Max_Storage_Withdraw[stor=STOR, hour=HOUR],
-                D_stor[hour, stor] <= CAP_ST[stor]);
+                D_stor[hour, stor] <= CAP_ST_P[stor]);
 
 
 
