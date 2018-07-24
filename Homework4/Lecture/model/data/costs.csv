@@ -1,6 +1,1 @@
-Technology,OC,MC,Lifetime
-NaturalGas,800,26,30
-HardCoal,1300,10,40
-WindOffshore,3200,0,20
-WindOnshore,1182,0,20
-PV,600,0,20
+Technology,OC,MC,LifetimeNaturalGas,800000,26,30HardCoal,1300000,10,40WindOffshore,3200000,0,20WindOnshore,1182000,0,20PV,600000,0,20

@@ -7,13 +7,13 @@ using Plots, StatPlots
 
 
 demand_table = loadtable("data/demand.csv", indexcols=1)
-costs_table = loadtable("data/costs.csv", indexcols=1)
+costs_table = loadtable("data/costs.csv", indexcols=1) # in kW
 storage_table = loadtable("data/storages.csv")
 availability_table = loadtable("data/availability.csv", indexcols=1)
 
 TECHNOLOGY = Array(select(costs_table, :Technology))
 NONDISP = string.(colnames(availability_table)[2:end])
-DISP = setdiff(TECHNOLOGY, NONDISP) 
+DISP = setdiff(TECHNOLOGY, NONDISP)
 STOR = Array(select(storage_table, :technology))
 
 
@@ -90,7 +90,7 @@ function invest(res_share::Int, solver=error("Set a solver!"))
         sum(G[hour,tech] for tech in TECHNOLOGY)
         + sum(G_stor[hour, stor] for stor in STOR)
         ==
-        demand[hour] +
+        demand[hour]
         + sum(D_stor[hour, stor] for stor in STOR));
 
     @constraint(Invest, MaxGeneration[hour=HOUR, disp=DISP],
@@ -145,8 +145,19 @@ function invest(res_share::Int, solver=error("Set a solver!"))
                        (HOUR,STOR),
                        ("Hour","Storage"))
 
+    storage_D   = NamedArray(getvalue(D_stor.innerArray) ./ 1000000,
+                         (HOUR,STOR),
+                        ("Hour","Storage"))
 
-    return capacity, generation, curtailment, storage
+   storage_CAP_E = NamedArray(getvalue(CAP_ST_E.innerArray) ./ 1000,
+                             (STOR,),
+                            ("Storage",))
+   storage_CAP_P = NamedArray(getvalue(CAP_ST_P.innerArray) ./ 1000,
+                            (STOR,),
+                            ("Storage",))
+
+    return capacity, generation, curtailment,
+    storage, storage_D, storage_CAP_E, storage_CAP_P
 end
 
 
@@ -160,15 +171,20 @@ capacity = zeros(len_tech,nr_scenario)
 generation = zeros(len_tech,nr_scenario)
 curtailment = zeros(nr_scenario)
 storage    = zeros(len_stor, nr_scenario)
+storage_D  = zeros(len_stor, nr_scenario)
+storage_CAP_E = zeros(len_stor, nr_scenario)
+storage_CAP_P = zeros(len_stor, nr_scenario)
 
 for (i,share) in enumerate(scenario)
     println("Calculating scenario with RES share $share %")
-    cap, gen, cur, stor = invest(share, ClpSolver())
+    cap, gen, cur, stor, stord, storcape, storcapp = invest(share, ClpSolver())
     capacity[:,i] = Array(cap)
     generation[:,i] = Array(sum(gen, 1))
     curtailment[i] = sum(cur)
     storage[:,i] = Array(sum(stor, 1))
-
+    storage_D[:,i] = Array(sum(stord, 1))
+    storage_CAP_E[:,i] = Array(storcape)
+    storage_CAP_P[:,i] = Array(storcapp)
 end
 
 

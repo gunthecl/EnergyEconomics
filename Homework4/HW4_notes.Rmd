@@ -36,6 +36,15 @@ the given model and one plot after you successfully implemented storages. How
 does the investment into generation capacity change? What happens with the
 curtailment?
 
+- gas capacity decreases with storage for all RES shares
+- largest different for 100% scenarios, capacity of onshore an offshore wind decreased strongly thorugh storage capacity
+- more pv installed in storage scenarios with RES share of 70 %, 80 % , the reverse is true for 90 % and 100 % scenarios.
+
+- For all modelled RES shares, the resulting curtailment is lower in the storage scenario compared to the no-storage case. Furthermore, curtailment in the storage scenario is drastically lower in the high RES scenarios. For the 100% RES scenario, it decreases more than 3 orders of magnitude (from 10763.3 TWh to 5.5 TWh). This is because the excess energy can be stored for later use instead of being curtailed. 
+
+#NOTE ONLY: No storage curtailemnt: 86.9342, 199.712, 494.086, 10763.3 TWh
+
+
 
 d) Create your own plot showing the investment into storage power and storage ca-
 pacity. How much energy is stored during the course of the year? How much
