@@ -30,6 +30,7 @@ In order to avoid a double charge for an investment into storages, we change the
         + 0.5 * sum(annuity_oc_power[stor] * CAP_ST[stor] for stor in STOR)
         + 0.5 * sum(annuity_oc_energy[stor] * CAP_ST[stor] for stor in STOR) )
 
+Furthermore, the change the cost input table for the power generation investment costs. Based on @@pape2014roadmap and  @zerrahn2015greenfield, we suspect the listed overnight investment costs to be specified costs per kW instead of MW. We thus multiply them by 1000.
 
 c) Run the model for shares of 70 %, 80 %, 90 %, and 100 %. Submit a plot from
 the given model and one plot after you successfully implemented storages. How
