@@ -2,6 +2,7 @@ using NamedArrays
 using JuliaDB
 using JuMP
 using Clp
+using Gurobi
 using Plots, StatPlots
 
 
@@ -168,7 +169,8 @@ len_stor = length(STOR)
 
 
 capacity = zeros(len_tech,nr_scenario)
-generation = zeros(len_tech,nr_scenario)
+generation = zeros(length(HOUR),nr_scenario)
+res_gen = zeros(length(HOUR), nr_scenario)
 curtailment = zeros(nr_scenario)
 storage    = zeros(len_stor, nr_scenario)
 storage_D  = zeros(len_stor, nr_scenario)
@@ -177,9 +179,16 @@ storage_CAP_P = zeros(len_stor, nr_scenario)
 
 for (i,share) in enumerate(scenario)
     println("Calculating scenario with RES share $share %")
-    cap, gen, cur, stor, stord, storcape, storcapp = invest(share, ClpSolver())
+    cap, gen, cur, stor, stord, storcape, storcapp = invest(share, GurobiSolver())
     capacity[:,i] = Array(cap)
-    generation[:,i] = Array(sum(gen, 1))
+    # Calculate renewables generation and store in res_gen[:,i]
+    res_gen = Array(gen)
+    res_gen = gen[:, 3:5]
+    res_cap = capacity[3:5,i]
+    for (i,n) in enumerate(res_cap)
+        res_gen[:,i] = res_gen[:,i].*res_cap[i]
+    end
+    generation[:,i] = Array(sum(gen, 2))
     curtailment[i] = sum(cur)
     storage[:,i] = Array(sum(stor, 1))
     storage_D[:,i] = Array(sum(stord, 1))
@@ -207,3 +216,14 @@ plot!(p,
     label="Curtailment [TWh]",
     color=:red,
     legend=:left)
+
+
+function load_curve(demand_table, res_infeed, scenario)
+    dem = select(demand_table, :Demand)
+    res = zeros(length(HOUR), length(scenario))
+    residual = zeros(length(HOUR), length(scenario))
+    for (i,s) in enumerate(scenario)
+        residual[:,i] = sort(dem - generation[:,i],rev=true)
+    end
+    plot(HOUR, [dem,residual])
+end
