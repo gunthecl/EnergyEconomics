@@ -38,17 +38,18 @@ curtailment?
 
 - gas capacity decreases with storage for all RES shares
 - largest different for 100% scenarios, capacity of onshore an offshore wind decreased strongly thorugh storage capacity
-- more pv installed in storage scenarios with RES share of 70 %, 80 % , the reverse is true for 90 % and 100 % scenarios.
-
+- in storage scenarios, more pv and onshore wind is installed with higher RES share
 - For all modelled RES shares, the resulting curtailment is lower in the storage scenario compared to the no-storage case. Furthermore, curtailment in the storage scenario is drastically lower in the high RES scenarios. For the 100% RES scenario, it decreases more than 3 orders of magnitude (from 10763.3 TWh to 5.5 TWh). This is because the excess energy can be stored for later use instead of being curtailed. 
-
-#NOTE ONLY: No storage curtailemnt: 86.9342, 199.712, 494.086, 10763.3 TWh
-
 
 
 d) Create your own plot showing the investment into storage power and storage ca-
 pacity. How much energy is stored during the course of the year? How much
 energy was lost due to storage efficiency?
+
+The installed storage power capacity increase with higher shares of RES, whereas the energy capacity is rather the same and even decreasing for the case of P2G. This is because more lithium-ion batteries are installed in the higher RES scenarios, since more PV is installed. We can see clear differences in investment structure between storage technologies, characterized by E/P ratio, which gives the relationship between the energy and power capacity fo a storage. Lithium-ion batteries, as typical short-term storage, has the smallest E/P ratio. In constrast, P2G has a very large E/P ratio since it is used a long-term storage.
+
+The overall stored energy over the year increases with the shared of RES, from a total of 130TWh for 70% RES to more than 500TWh fpr the 100% RES case. The distribution over the different storage technologies can be seen in plot XXX:
+Similarily, the lost energy increases with higher RES share since it is a linear function of the storage energy. As can be seen in plot YYY, a total of roughly 80TWh is lost for the 100% scenario.
 
 
 Sources
