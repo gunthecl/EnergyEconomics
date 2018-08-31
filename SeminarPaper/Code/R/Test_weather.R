@@ -105,11 +105,11 @@ dat.new  <- list()
 no.drop <- nrow(dat.original)-floor(nrow(dat.original)/7/24)*7*24
 dat     <- dat[-c((nrow(dat)-no.drop+1):nrow(dat)),]
 
-for (i in 1:(nrow(dat)/(24*7))){
+for (i in 1:(nrow(dat)/(24))){
   
-  j       <- i*24*7 - 167
+  j       <- i*24 - 23
   
-  dat.day   <- dat[j:(j+167),]
+  dat.day   <- dat[j:(j+23),]
   data_long <- melt(dat.day)
   data_wide <- t(data_long$value)
   colnames(data_wide) <- data_long$variable
@@ -159,7 +159,7 @@ medoid.vec    <- dat[medoid.IND,]
 
 # Compare original LDC and fitted (here GB)
 
-test.GB.load <- medoid.vec[,2521:2688]
+test.GB.load <- medoid.vec[,361:384]
 days.list    <- list()
 days.repl    <- for (i in 1:length(cluster.k$size)){
   
