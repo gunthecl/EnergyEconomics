@@ -81,6 +81,18 @@ function invest(sets::Dict, param::Dict, solver=error("Set a solver!"))
         D_STOR[hour, zone, stor] <= CAP_ST_P[zone, stor]
     );
 
+    @constraint(Invest, StorageGeneration[hour=HOURS, zone=ZONES, stor=STOR;
+        hour != HOURS[1]],
+        G_STOR[hour, zone, stor] <= L_STOR[hour-1, zone, stor]
+    );
+
+    @constraint(Invest, StorageWithdraw[hour=HOURS, zone=ZONES, stor=STOR;
+        hour != HOURS[1]],
+        D_STOR[hour, zone, stor]
+        <=
+        CAP_ST_P[zone, stor] - L_STOR[hour-1, zone, stor]
+    );
+
     lenResConst = length(HOURS)*length(ZONES)*length(NONDISP)
     i = 1
     @constraintref ResAvailability[1:lenResConst]
@@ -135,7 +147,7 @@ function invest(sets::Dict, param::Dict, solver=error("Set a solver!"))
         results[zone]["Storage Energy"] = cap_stor_energy[zone, :]
         results[zone]["Storage Power"] = cap_stor_power[zone, :]
         results[zone]["Curtailment"] = curtailment[:, zone, :]
-        results[zone]["Exchange"] = exchange[:, zone, :]
+        results[zone]["Exchange"] = exchange[:, :, zone]
         results["Price"] = price
     end
 
