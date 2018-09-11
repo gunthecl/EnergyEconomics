@@ -1,0 +1,6 @@
+technology,type,oc,mc,lifetime
+NaturalGas,disp,800000,26,30
+HardCoal,disp,1300000,10,40
+WindOffshore,nondisp,3200000,0,20
+WindOnshore,nondisp,1182000,0,20
+PV,nondisp,600000,0,20
