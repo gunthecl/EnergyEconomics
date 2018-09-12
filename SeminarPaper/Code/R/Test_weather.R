@@ -191,7 +191,7 @@ clus <- hclust(Dis.ecl, method = "ward.D2")
 #plot(dendrogram, ylab = "Height", leaflab = "none")
 
 # Determine the number of clusters
-no.cl    = 50
+no.cl    = 30
 clusters = cutree(clus, k = no.cl) 
 rect.hclust(clus, k= no.cl, border="red") 
 
@@ -454,5 +454,29 @@ ggplot(dat.compare, aes(x = hour)) +
               panel.background = element_blank(),
               legend.key=element_blank())
 
+################################################################################
+# Export
 
+## Store each scenario separately 
+scenarios <- list()
+for (i in 1:nrow(medoid.vec)){
+    
+    data.raw       <- list()
+    steps          <- ncol(medoid.vec)/24
+    
+    for (j in 1:steps){
+        
+    hours.day    <- {j*24-23}:{j*24}  
+    new.variable <- t(medoid.vec[i,hours.day]) 
+    
+    colnames(new.variable) <- colnames(medoid.vec[i,hours.day])[1]
+    data.raw[[j]] <- (new.variable)
+    }
+    
+    scenarios[[i]] <- list.cbind(data.raw)
+    
+}
 
+#save(medoid.vec, file = "scenario30.rda")
+save(scenarios, file = "scenarios30.rda")
+write.csv(x = medoid.vec, file = "test.csv")
