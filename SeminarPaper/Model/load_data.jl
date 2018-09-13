@@ -1,4 +1,4 @@
-function load_data(hours::Int64, folder::String)
+function load_data(folder::String)
     # load files
     demand_table    = loadtable(string(folder, "/zone_demand.csv"))
     tech_table      = loadtable(string(folder, "/tech.csv"))

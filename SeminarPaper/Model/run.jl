@@ -14,8 +14,8 @@ include("greenfield.jl")
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
-sets, param = load_data(8760, "test_data")
-results = invest(sets, param, GurobiSolver())
+sets, param = load_data("test_data")
+results = invest(sets, param, 1:200, GurobiSolver())
 
 # quick Overview
 for z in sets["Zones"]
@@ -35,11 +35,16 @@ end
 
 # generation plot
 cap = zeros(1,5)
+cap_name = sets["Tech"]
+ctg = repeat(cap_name, inner=length(sets["Zones"]))
+name = repeat(sets["Zones"], outer=length(cap_name))
 for z in sets["Zones"]
     cap = vcat(cap, Array(Array(results[z]["Capacity"])'))
-    cap_name = names(results[z]["Capacity"])[1]
-    ctg = repeat(cap_name, inner=length(sets["Zones"]))
-    name = repeat(sets["Zones"], outer=length(cap_name))
 end
 cap = cap[setdiff(1:end, 1), :]
-groupedbar(name, cap, group = ctg, bar_position=:stack, lw=0)
+groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
+            ylabel = "installed capacity in MW", framestyle=:box)
+
+# time series plot
+zone = "Zone1"
+timeframe = 500:668 # 1 week

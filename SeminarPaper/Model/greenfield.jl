@@ -1,6 +1,7 @@
-function invest(sets::Dict, param::Dict, solver=error("Set a solver!"))
+function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
+                solver=solver)
 
-    HOURS   = sets["Hours"]
+    HOURS   = collect(timeset)
     TECH    = sets["Tech"]
     DISP    = sets["Disp"]
     NONDISP = sets["Nondisp"]
