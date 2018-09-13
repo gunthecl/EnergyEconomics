@@ -48,3 +48,23 @@ groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
 # time series plot
 zone = "Zone1"
 timeframe = 500:668 # 1 week
+
+
+@userplot Areaplot
+@recipe function f(a::Areaplot)
+    data = cumsum(a.args[1], 2)
+
+    seriestype := :line
+    fillrange := 0
+
+    @series begin
+        data[:,1]
+    end
+
+    for i in 2:size(data, 2)
+    @series begin
+            fillrange := data[:,i-1]
+            data[:,i]
+        end
+    end
+end
