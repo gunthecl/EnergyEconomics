@@ -36,6 +36,7 @@ dat.load.2015      <- read.csv(paste0(wd.path,"time_series_load_2015_final.csv")
                           stringsAsFactors = FALSE)
 
 # Source needed functions
+setwd(wd.path)
 source("HelperFunctions.R")
 
 ################################################################################
@@ -193,7 +194,7 @@ clus <- hclust(Dis.ecl, method = "ward.D2")
 # Determine the number of clusters
 no.cl    = 30
 clusters = cutree(clus, k = no.cl) 
-rect.hclust(clus, k= no.cl, border="red") 
+#rect.hclust(clus, k= no.cl, border="red") 
 
 # Find centroids and medoids of clusters
 centroid.vec  <- clust.centroid(dataframe = dat.unscaled, clusters.IND = clusters)
@@ -480,3 +481,14 @@ for (i in 1:nrow(medoid.vec)){
 #save(medoid.vec, file = "scenario30.rda")
 save(scenarios, file = "scenarios30.rda")
 write.csv(x = medoid.vec, file = "test.csv")
+
+# Save weights fpr scenarios
+weights <- cluster.size/sum(cluster.size)
+
+# Sanity check
+sum(cluster.size) == nrow(dat.original)/24
+
+save(weights, file = "weights30.rda")
+write.csv(x = weights, file = "weights30.csv")
+
+
