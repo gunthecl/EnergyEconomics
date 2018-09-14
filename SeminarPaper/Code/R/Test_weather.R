@@ -112,8 +112,8 @@ length(leap.days.vec) == length(years.sequence)*24
 # Exclude leap year days
 dat.original     <- dat.original[-leap.days.vec,]
 
-# Bind load data (2014) to all years
-load.vec         <- dat.load[rep(seq_len(nrow(dat.load)), each=nrow(dat.original)/nrow(dat.load)),]
+# Bind load data (2015) to all years
+load.vec         <- dat.load[rep(seq_len(nrow(dat.load)), times = nrow(dat.original)/nrow(dat.load)),]
 
 dat.original     <- cbind(dat.original, load.vec)
 
@@ -490,29 +490,29 @@ country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
 
 
 for (i in 1:30){
-    
-   running.numb <- paste0("scen",(i*4)-3)
-    
+
    # Save pv vector
-   scenario.tech[[paste0(running.numb, "pv")]]           <- scenarios[[i]][1:24,pv]
-   colnames(scenario.tech[[paste0(running.numb, "pv")]]) <- country
-   rownames(scenario.tech[[paste0(running.numb, "pv")]]) <- 1:24
+   scenario.tech[[paste0(i, "pv")]]           <- scenarios[[i]][1:24,pv]
+   colnames(scenario.tech[[paste0(i, "pv")]]) <- country
+   rownames(scenario.tech[[paste0(i, "pv")]]) <- 1:24
+   scenario.tech[[paste0(i, "pv")]]           <- data.frame(scenario.tech[[paste0(i, "pv")]])
    
    # Save onshore vector
-   scenario.tech[[paste0(running.numb, "on")]] <- scenarios[[i]][1:24,onshore]
-   colnames(scenario.tech[[paste0(running.numb, "on")]]) <- country
-   rownames(scenario.tech[[paste0(running.numb, "on")]]) <- 1:24
+   scenario.tech[[paste0(i, "on")]] <- scenarios[[i]][1:24,onshore]
+   colnames(scenario.tech[[paste0(i, "on")]]) <- country
+   rownames(scenario.tech[[paste0(i, "on")]]) <- 1:24
+   scenario.tech[[paste0(i, "on")]]    <- data.frame(scenario.tech[[paste0(i, "on")]])
    
    # Save offshore vector
-   scenario.tech[[paste0(running.numb, "off")]] <- scenarios[[i]][1:24,offshore]
-   colnames(scenario.tech[[paste0(running.numb, "off")]]) <- country[1:5]
-   rownames(scenario.tech[[paste0(running.numb, "off")]]) <- 1:24
-   
+   scenario.tech[[paste0(i, "off")]] <- scenarios[[i]][1:24,offshore]
+   colnames(scenario.tech[[paste0(i, "off")]]) <- country[1:5]
+   rownames(scenario.tech[[paste0(i, "off")]]) <- 1:24
+   scenario.tech[[paste0(i, "off")]] <- data.frame(scenario.tech[[paste0(i, "off")]])
    # Save load vector
-   scenario.tech[[paste0(running.numb, "load")]] <- scenarios[[i]][1:24,load]
-   colnames(scenario.tech[[paste0(running.numb, "load")]]) <- country
-   rownames(scenario.tech[[paste0(running.numb, "load")]]) <- 1:24
-   
+   scenario.tech[[paste0(i, "load")]] <- scenarios[[i]][1:24,load]
+   colnames(scenario.tech[[paste0(i, "load")]]) <- country
+   rownames(scenario.tech[[paste0(i, "load")]]) <- 1:24
+   scenario.tech[[paste0(i, "load")]] <- data.frame(scenario.tech[[paste0(i, "load")]])
    
     
 }
@@ -551,7 +551,4 @@ labels.tech    <- cbind((rep(1:30, each = 4)), tech)
 
 write.csv(x = labels.tech, file = "labelscen.csv")
 write.csv(x = country, file = "labelcountry.csv")
-str(scenario.tech)
-View(scenario.tech[[4]])
 
-scenario.tech$a <- "hello"
