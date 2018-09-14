@@ -74,17 +74,16 @@ dat.load.2015$IBE_load_entsoe_power_statistics <-  ( dat.load.2015$ES_load_entso
 var.vec     <- c("BNL_pv_national_current", "BNL_wind_onshore_current", "BNL_wind_offshore_current",
                  "DE_pv_national_current", "DE_wind_onshore_current", "DE_wind_offshore_current",
                  "DK_pv_national_current", "DK_wind_onshore_current", "DK_wind_offshore_current",
-                  "ES_pv_national_current", "ES_wind_national_current",
                   "FR_pv_national_current", "FR_wind_onshore_current", "FR_wind_offshore_current",
                   "GB_pv_national_current", "GB_wind_onshore_current", "GB_wind_offshore_current",
-                  "PT_pv_national_current", "PT_wind_national_current")
+                  "IBE_pv_national_current", "IBE_wind_onshore_current")
 
 var.vec.load <- c("BNL_load_entsoe_power_statistics",
                   "DE_load_entsoe_power_statistics", 
                   "DK_load_entsoe_power_statistics",
-                  "IBE_load_entsoe_power_statistics",
                   "FR_load_entsoe_power_statistics",
-                  "GB_load_entsoe_power_statistics")
+                  "GB_load_entsoe_power_statistics",
+                  "IBE_load_entsoe_power_statistics")
 
 dat.original <- dat.res[,var.vec]
 
@@ -359,7 +358,7 @@ cluster.2014    <- clusters[days.2014]
 dat.2014.medoid.raw  <- medoid.vec[cluster.2014,]
 dat.2014.medoid.list <- list()
 # Merge hours back into one vector
-for (i in 1:25){
+for (i in 1:23){
   
     vec.hours <- {i*24-23}:{i*24}
     col.vec   <-  dat.2014.medoid.raw[,vec.hours]
@@ -478,9 +477,64 @@ for (i in 1:nrow(medoid.vec)){
     
 }
 
+
+## Split each technology separately 
+
+scenario.tech <- list()
+pv       <- seq(from = 1, to = 17, by = 3)
+onshore  <- seq(from = 2, to = 17, by = 3)
+offshore <- seq(from = 3, to = 17, by = 3)
+load     <- 18:23
+
+country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
+
+
+for (i in 1:30){
+    
+   running.numb <- paste0("scen",(i*4)-3)
+    
+   # Save pv vector
+   scenario.tech[[paste0(running.numb, "pv")]]           <- scenarios[[i]][1:24,pv]
+   colnames(scenario.tech[[paste0(running.numb, "pv")]]) <- country
+   rownames(scenario.tech[[paste0(running.numb, "pv")]]) <- 1:24
+   
+   # Save onshore vector
+   scenario.tech[[paste0(running.numb, "on")]] <- scenarios[[i]][1:24,onshore]
+   colnames(scenario.tech[[paste0(running.numb, "on")]]) <- country
+   rownames(scenario.tech[[paste0(running.numb, "on")]]) <- 1:24
+   
+   # Save offshore vector
+   scenario.tech[[paste0(running.numb, "off")]] <- scenarios[[i]][1:24,offshore]
+   colnames(scenario.tech[[paste0(running.numb, "off")]]) <- country[1:5]
+   rownames(scenario.tech[[paste0(running.numb, "off")]]) <- 1:24
+   
+   # Save load vector
+   scenario.tech[[paste0(running.numb, "load")]] <- scenarios[[i]][1:24,load]
+   colnames(scenario.tech[[paste0(running.numb, "load")]]) <- country
+   rownames(scenario.tech[[paste0(running.numb, "load")]]) <- 1:24
+   
+   
+    
+}
+
+
+
+mean.vecs <- list()
+for (i in 1:30){
+    
+    
+    mean.vecs[[i]] <- apply(scenarios[[i]], 2, mean)
+    
+}
+
+z <- list.rbind(mean.vecs)
+
 #save(medoid.vec, file = "scenario30.rda")
 save(scenarios, file = "scenarios30.rda")
+save(scenario.tech, file = "scenariotech30.rda")
 write.csv(x = medoid.vec, file = "test.csv")
+write.csv(x = scenario.tech, file = "tech.csv")
+
 
 # Save weights fpr scenarios
 weights <- cluster.size/sum(cluster.size)
@@ -491,4 +545,13 @@ sum(cluster.size) == nrow(dat.original)/24
 save(weights, file = "weights30.rda")
 write.csv(x = weights, file = "weights30.csv")
 
+labels.country <- country
+tech <- c("pv", "onshore", "offshore", "load")
+labels.tech    <- cbind((rep(1:30, each = 4)), tech)
 
+write.csv(x = labels.tech, file = "labelscen.csv")
+write.csv(x = country, file = "labelcountry.csv")
+str(scenario.tech)
+View(scenario.tech[[4]])
+
+scenario.tech$a <- "hello"
