@@ -33,7 +33,7 @@ function load_data(hours::Int64, folder::String)
     ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
     ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
 
-    i = 0.04 # expected annual interest
+    i = 0.05 # expected annual interest
     annuity             = map(row-> row.oc * (i+1)^row.lifetime /
                         (((1+i)^row.lifetime)-1), tech_table)
     annuity_oc_power    = map(row-> row.oc_power * (i+1)^row.lifetime /
