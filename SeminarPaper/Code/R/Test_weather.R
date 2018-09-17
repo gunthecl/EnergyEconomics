@@ -26,7 +26,7 @@ lapply(neededPackages, function(x) suppressPackageStartupMessages(
 ################################################################################
 
 ## Change path to working directory
-wd.path = "/Users/claudiaguenther/documents/EnergyEconomics/SeminarPaper/Code/R/"
+wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
 
 
 # Read in wind and pv data set
@@ -312,15 +312,9 @@ days.repl   <- for (i in 1:length(cluster.size)){
 }
 
 GER.wind_on.repl <- data.frame(list.rbind(days.list))
-GER.wind_on.repl <- unlist(GER.wind_on.repl)
+GER.wind_on.repl <- sort(unlist(GER.wind_on.repl), decreasing = TRUE)
 GER.wind_on.org  <- dat.original[,col.wind_on.GER.org]
 GER.wind_on.org  <- sort(GER.wind_on.org, decreasing = TRUE)
-
-par(mar = rep(2, 4))
-plot(sort(GER.wind_on.repl, decreasing = TRUE),type="l",col="red")
-lines(GER.wind_on.org, col="green")
-
-length(GER.wind_on.org) == length(GER.wind_on.repl)
 
 # Find columns of German offshore wind data
 col.wind_off.GER     <- grepl("DE_wind_off", colnames(medoid.vec))
@@ -338,13 +332,40 @@ days.repl   <- for (i in 1:length(cluster.size)){
 }
 
 GER.wind_off.repl <- data.frame(list.rbind(days.list))
-GER.wind_off.repl <- unlist(GER.wind_off.repl)
+GER.wind_off.repl <- sort(unlist(GER.wind_off.repl), decreasing = TRUE)
 GER.wind_off.org  <- dat.original[,col.wind_off.GER.org]
 GER.wind_off.org  <- sort(GER.wind_off.org, decreasing = TRUE)
 
-par(mar = rep(2, 4))
-plot(sort(GER.wind_off.repl, decreasing = TRUE),type="l",col="red")
-lines(GER.wind_off.org, col="green")
+GER.wind.both      <- as.data.frame(cbind(GER.wind_on.org,  GER.wind_on.repl,
+                                          GER.wind_off.org, GER.wind_off.repl))
+GER.wind.both$hour <- 1:nrow(GER.wind_on.both)
+
+ggplot(GER.wind.both, aes(x = hour)) + 
+  geom_line(aes(y = GER.wind_on.org, colour = "Original onshore series" )) + 
+  geom_line(aes(y = GER.wind_on.repl, colour = "Replicated onshore series")) + 
+  geom_line(aes(y = GER.wind_off.org, colour = "Original offshore series" )) + 
+  geom_line(aes(y = GER.wind_off.repl, colour = "Replicated offshore series")) +
+  scale_colour_manual("", 
+                      breaks = c("Original onshore series", "Replicated onshore series",
+                                 "Original offshore series", "Replicated offshore series"),
+                      values = c("grey", "light blue", " dark blue", "black")) +
+  ylab(label="Load in MWh") + 
+  xlab("Hours") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) + theme(
+          plot.margin=unit(c(1,1,1,2), "cm"),
+          panel.grid = element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.x=element_blank(),
+          panel.background = element_blank(),
+          legend.key=element_blank())
+
+
+rm(GER.wind.both, GER.wind_on.org, GER.wind_on.repl,
+   col.wind_on.GER, col.wind_on.GER.org,
+  GER.wind_off.org, GER.wind_off.repl,
+   col.wind_off.GER, col.wind_off.GER.org)
+
 
 length(GER.wind_off.org) == length(GER.wind_off.repl)
 
