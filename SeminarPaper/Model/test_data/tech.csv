@@ -1,4 +1,4 @@
-technology,type,oc,mc,lifetime
+technology,type,oc,mc,Lifetime[a]
 NaturalGas,disp,800000,26,30
 HardCoal,disp,1300000,10,40
 WindOffshore,nondisp,3200000,0,20
