@@ -56,3 +56,6 @@ mc =NamedArray(select(TechTable, :MC), (TECHNOLOGY,), ("Technologies",))
 EtaTech =NamedArray(select(TechTable, :eta), (TECHNOLOGY,), ("Technologies",))
 EtaStor =NamedArray(select(StoregesTable, :eta), (STOR,), ("Storeges",))
 eta     =vcat(EtaTech, EtaStor)
+
+#carbon content for implemenation of maximum CO2 emission
+CarbCon =NamedArray(select(TechTable, :CarbCon), (TECHNOLOGY,), ("Technologies",))
