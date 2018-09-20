@@ -2,6 +2,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
                 solver=solver)
 
     HOURS   = collect(timeset)
+    #SCEN    = sets["Scenarios"]
     TECH    = sets["Tech"]
     DISP    = sets["Disp"]
     NONDISP = sets["Nondisp"]
@@ -11,6 +12,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
     Invest = Model(solver=GurobiSolver())
 
     # generation
+    # TODO: expand variables by scenario
     @variable(Invest, G[HOURS, ZONES, TECH]      >= 0)  # electricity generation
     @variable(Invest, G_STOR[HOURS, ZONES, STOR] >= 0)  # storage generation
     @variable(Invest, D_STOR[HOURS, ZONES, STOR] >= 0)  # storage consumption
@@ -29,6 +31,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         JuMP.fix(L_STOR[HOURS[1], zone, stor], 0)
     end
     # objective function
+    # TODO: OC energy and power may be replaced by MC; expand by scenarios
     @objective(Invest, Min,
         sum(param["MarginalCost"][tech] * G[hour, zone, tech]
             for hour in HOURS, tech in TECH, zone in ZONES)
@@ -40,6 +43,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
             for stor in STOR, zone in ZONES)
         );
     # constraints
+    # TODO: Expand by scenarios
     @constraint(Invest, EnergyBalance[hour=HOURS, zone=ZONES],
         sum(G[hour, zone, tech] for tech in TECH)
         + sum(G_STOR[hour, zone, stor] for stor in STOR)
@@ -113,7 +117,8 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
     );
     # call solver
     status = solve(Invest)
-
+    # format solution
+    # TODO: account for scenarios
     generation = NamedArray(getvalue(G.innerArray), (HOURS, ZONES, TECH),
         ("Hour", "Zone", "Technology"))
     storage_gen = NamedArray(getvalue(G_STOR.innerArray), (HOURS, ZONES, STOR),
