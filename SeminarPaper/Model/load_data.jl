@@ -1,4 +1,5 @@
-function load_data(hours::Int64, folder::String)
+function load_data(folder::String)
+folder="test_data"
     # load files
     demand_table    = loadtable(string(folder, "/zone_demand.csv"))
     tech_table      = loadtable(string(folder, "/tech.csv"))
@@ -34,12 +35,13 @@ function load_data(hours::Int64, folder::String)
     ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
 
     i = 0.05 # expected annual interest
-    annuity             = map(row-> row.oc * (i+1)^row.lifetime /
-                        (((1+i)^row.lifetime)-1), tech_table)
-    annuity_oc_power    = map(row-> row.oc_power * (i+1)^row.lifetime /
-                        (((1+i)^row.lifetime)-1), storage_table)
-    annuity_oc_energy   = map(row-> row.oc_storage * (i+1)^row.lifetime /
-                        (((1+i)^row.lifetime)-1), storage_table)
+    annuityarray        =NamedArray(select(tech_table, :AnnuityTot[EUR/MWa]), (TECHNOLOGY,), ("Technology",))#ekige klammern gehen nicht
+    annuity             = map(row-> row.FOMCost[EUR/MWa] * (i+1)^row.Lifetime[a] /
+                        (((1+i)^row.Lifetime[a])-1), tech_table)
+    annuity_oc_power    = map(row-> row.oc_power * (i+1)^row.Lifetime[a] /
+                        (((1+i)^row.Lifetime[a])-1), storage_table)
+    annuity_oc_energy   = map(row-> row.oc_storage * (i+1)^row.Lifetime[a] /
+                        (((1+i)^row.Lifetime[a])-1), storage_table)
     annuity             = NamedArray(annuity, (TECHNOLOGY,), ("Technology",))
     annuity_oc_power    = NamedArray(annuity_oc_power, (STOR,), ("Storage",))
     annuity_oc_energy   = NamedArray(annuity_oc_energy, (STOR,), ("Storage",))
