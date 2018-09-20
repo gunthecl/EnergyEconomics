@@ -1,8 +1,8 @@
-Technology,Type,InvestCost,FOM,Lifetime,Annuity,MC,eta,CarbCon
-Lignite,disp,1596000,49500,45,1.392.937.285,20.43,0.39,0.36
-Coal,disp,1957000,52000,45,1.621.042.147,22.83,0.415,0.35
-Gas,disp,928000,26500,45,7.871.088.976,36.69,0.495,0.2
-WindOnshore,nondisp,1548000,13000,25,1.228.344.039,0,1,0
-WindOffshore,nondisp,2473000,93000,25,2.684.654.269,0,1,0
-PVGround,nondisp,774000,15000,25,6.991.720.195,0,1,0
-PVRoof,nondisp,972000,17000,25,8.596.578.849,0,1,0
+Technology,Type,Annuity,CarbCon,MC,eta
+Lignite,disp,139293.73,0.9231,52.38,0.39
+Coal,disp,162104.21,0.8434,55.01,0.415
+Gas,disp,78710.89,0.4040,74.12,0.495
+WindOnshore,nondisp,122834.40,0.0000,0.00,1
+WindOffshore,nondisp,268465.43,0.0000,0.00,1
+PVGround,nondisp,69917.20,0,0,1
+PVRoof,nondisp,85965.79,0,0,1
