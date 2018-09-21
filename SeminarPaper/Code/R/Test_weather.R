@@ -26,7 +26,7 @@ lapply(neededPackages, function(x) suppressPackageStartupMessages(
 ################################################################################
 
 ## Change path to working directory
-wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
+wd.path = "/Users/claudiaguenther/documents/EnergyEconomics/SeminarPaper/Code/R/"
 
 
 # Read in wind and pv data set
@@ -508,7 +508,6 @@ offshore <- seq(from = 3, to = 17, by = 3)
 load     <- 18:23
 
 country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
-
 
 for (i in 1:30){
 
