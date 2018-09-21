@@ -372,8 +372,8 @@ length(GER.wind_off.org) == length(GER.wind_off.repl)
 ################################################################################
 # Reproduce 2014 weather year with cluster medoids
 
-days.2014       <- {(365*29)+1}:{365*30}
-hours.2014      <- {(365*29*24)+1}:{365*30*24}
+days.2014       <- {(365*30)+1}:{365*31}
+hours.2014      <- {(365*30*24)+1}:{365*31*24}
 cluster.2014    <- clusters[days.2014]
 
 dat.2014.medoid.raw  <- medoid.vec[cluster.2014,]
