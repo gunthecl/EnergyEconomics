@@ -10,12 +10,16 @@ using Gurobi
 
 # include functions
 include("load_data.jl")
+include("load_rdata.jl")
 include("greenfield.jl")
 
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
 sets, param = load_data("input data")
+scenarios   = loadRData("test_scenario/stochastic/scenariotech30.rda",
+    "test_scenario/stochastic/weights30.csv", 30, collect(1:24),
+    ["BNL", "DE", "DK", "FR", "GB", "IBE"])
 results = invest(sets, param, 1:200, GurobiSolver())
 
 # quick Overview

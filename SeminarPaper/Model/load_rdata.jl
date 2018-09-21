@@ -1,10 +1,10 @@
 function loadRData(file_scenario::String, file_weight::String,
     num_scenarios::Int64, HOURS::Any, ZONES::Any)
     # load RData file
-    rData = load(file_scenario, convert=true)
+    rData = RData.load(file_scenario, convert=true)
     rData = rData["scenario.tech"] # discard nesting level
     # load weights table
-    weight_table = loadtable(file_weight)
+    weight_table = JuliaDB.loadtable(file_weight)
     weight = select(weight_table, (:weight))
 
     scenarios = Dict()
