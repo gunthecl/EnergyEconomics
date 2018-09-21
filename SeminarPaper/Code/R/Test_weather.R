@@ -36,6 +36,7 @@ dat.load.2015      <- read.csv(paste0(wd.path,"time_series_load_2015_final.csv")
                           stringsAsFactors = FALSE)
 
 # Source needed functions
+setwd(wd.path)
 source("HelperFunctions.R")
 
 ################################################################################
@@ -73,17 +74,16 @@ dat.load.2015$IBE_load_entsoe_power_statistics <-  ( dat.load.2015$ES_load_entso
 var.vec     <- c("BNL_pv_national_current", "BNL_wind_onshore_current", "BNL_wind_offshore_current",
                  "DE_pv_national_current", "DE_wind_onshore_current", "DE_wind_offshore_current",
                  "DK_pv_national_current", "DK_wind_onshore_current", "DK_wind_offshore_current",
-                  "ES_pv_national_current", "ES_wind_national_current",
                   "FR_pv_national_current", "FR_wind_onshore_current", "FR_wind_offshore_current",
                   "GB_pv_national_current", "GB_wind_onshore_current", "GB_wind_offshore_current",
-                  "PT_pv_national_current", "PT_wind_national_current")
+                  "IBE_pv_national_current", "IBE_wind_onshore_current")
 
 var.vec.load <- c("BNL_load_entsoe_power_statistics",
                   "DE_load_entsoe_power_statistics", 
                   "DK_load_entsoe_power_statistics",
-                  "IBE_load_entsoe_power_statistics",
                   "FR_load_entsoe_power_statistics",
-                  "GB_load_entsoe_power_statistics")
+                  "GB_load_entsoe_power_statistics",
+                  "IBE_load_entsoe_power_statistics")
 
 dat.original <- dat.res[,var.vec]
 
@@ -112,8 +112,8 @@ length(leap.days.vec) == length(years.sequence)*24
 # Exclude leap year days
 dat.original     <- dat.original[-leap.days.vec,]
 
-# Bind load data (2014) to all years
-load.vec         <- dat.load[rep(seq_len(nrow(dat.load)), each=nrow(dat.original)/nrow(dat.load)),]
+# Bind load data (2015) to all years
+load.vec         <- dat.load[rep(seq_len(nrow(dat.load)), times = nrow(dat.original)/nrow(dat.load)),]
 
 dat.original     <- cbind(dat.original, load.vec)
 
@@ -193,7 +193,7 @@ clus <- hclust(Dis.ecl, method = "ward.D2")
 # Determine the number of clusters
 no.cl    = 30
 clusters = cutree(clus, k = no.cl) 
-rect.hclust(clus, k= no.cl, border="red") 
+#rect.hclust(clus, k= no.cl, border="red") 
 
 # Find centroids and medoids of clusters
 centroid.vec  <- clust.centroid(dataframe = dat.unscaled, clusters.IND = clusters)
@@ -312,15 +312,9 @@ days.repl   <- for (i in 1:length(cluster.size)){
 }
 
 GER.wind_on.repl <- data.frame(list.rbind(days.list))
-GER.wind_on.repl <- unlist(GER.wind_on.repl)
+GER.wind_on.repl <- sort(unlist(GER.wind_on.repl), decreasing = TRUE)
 GER.wind_on.org  <- dat.original[,col.wind_on.GER.org]
 GER.wind_on.org  <- sort(GER.wind_on.org, decreasing = TRUE)
-
-par(mar = rep(2, 4))
-plot(sort(GER.wind_on.repl, decreasing = TRUE),type="l",col="red")
-lines(GER.wind_on.org, col="green")
-
-length(GER.wind_on.org) == length(GER.wind_on.repl)
 
 # Find columns of German offshore wind data
 col.wind_off.GER     <- grepl("DE_wind_off", colnames(medoid.vec))
@@ -338,27 +332,54 @@ days.repl   <- for (i in 1:length(cluster.size)){
 }
 
 GER.wind_off.repl <- data.frame(list.rbind(days.list))
-GER.wind_off.repl <- unlist(GER.wind_off.repl)
+GER.wind_off.repl <- sort(unlist(GER.wind_off.repl), decreasing = TRUE)
 GER.wind_off.org  <- dat.original[,col.wind_off.GER.org]
 GER.wind_off.org  <- sort(GER.wind_off.org, decreasing = TRUE)
 
-par(mar = rep(2, 4))
-plot(sort(GER.wind_off.repl, decreasing = TRUE),type="l",col="red")
-lines(GER.wind_off.org, col="green")
+GER.wind.both      <- as.data.frame(cbind(GER.wind_on.org,  GER.wind_on.repl,
+                                          GER.wind_off.org, GER.wind_off.repl))
+GER.wind.both$hour <- 1:nrow(GER.wind_on.both)
+
+ggplot(GER.wind.both, aes(x = hour)) + 
+  geom_line(aes(y = GER.wind_on.org, colour = "Original onshore series" )) + 
+  geom_line(aes(y = GER.wind_on.repl, colour = "Replicated onshore series")) + 
+  geom_line(aes(y = GER.wind_off.org, colour = "Original offshore series" )) + 
+  geom_line(aes(y = GER.wind_off.repl, colour = "Replicated offshore series")) +
+  scale_colour_manual("", 
+                      breaks = c("Original onshore series", "Replicated onshore series",
+                                 "Original offshore series", "Replicated offshore series"),
+                      values = c("grey", "light blue", " dark blue", "black")) +
+  ylab(label="Load in MWh") + 
+  xlab("Hours") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) + theme(
+          plot.margin=unit(c(1,1,1,2), "cm"),
+          panel.grid = element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.x=element_blank(),
+          panel.background = element_blank(),
+          legend.key=element_blank())
+
+
+rm(GER.wind.both, GER.wind_on.org, GER.wind_on.repl,
+   col.wind_on.GER, col.wind_on.GER.org,
+  GER.wind_off.org, GER.wind_off.repl,
+   col.wind_off.GER, col.wind_off.GER.org)
+
 
 length(GER.wind_off.org) == length(GER.wind_off.repl)
 
 ################################################################################
 # Reproduce 2014 weather year with cluster medoids
 
-days.2014       <- {(365*29)+1}:{365*30}
-hours.2014      <- {(365*29*24)+1}:{365*30*24}
+days.2014       <- {(365*30)+1}:{365*31}
+hours.2014      <- {(365*30*24)+1}:{365*31*24}
 cluster.2014    <- clusters[days.2014]
 
 dat.2014.medoid.raw  <- medoid.vec[cluster.2014,]
 dat.2014.medoid.list <- list()
 # Merge hours back into one vector
-for (i in 1:25){
+for (i in 1:23){
   
     vec.hours <- {i*24-23}:{i*24}
     col.vec   <-  dat.2014.medoid.raw[,vec.hours]
@@ -477,6 +498,77 @@ for (i in 1:nrow(medoid.vec)){
     
 }
 
+
+## Split each technology separately 
+
+scenario.tech <- list()
+pv       <- seq(from = 1, to = 17, by = 3)
+onshore  <- seq(from = 2, to = 17, by = 3)
+offshore <- seq(from = 3, to = 17, by = 3)
+load     <- 18:23
+
+country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
+
+for (i in 1:30){
+
+   # Save pv vector
+   scenario.tech[[paste0(i, "pv")]]           <- scenarios[[i]][1:24,pv]
+   colnames(scenario.tech[[paste0(i, "pv")]]) <- country
+   rownames(scenario.tech[[paste0(i, "pv")]]) <- 1:24
+   scenario.tech[[paste0(i, "pv")]]           <- data.frame(scenario.tech[[paste0(i, "pv")]])
+   
+   # Save onshore vector
+   scenario.tech[[paste0(i, "on")]] <- scenarios[[i]][1:24,onshore]
+   colnames(scenario.tech[[paste0(i, "on")]]) <- country
+   rownames(scenario.tech[[paste0(i, "on")]]) <- 1:24
+   scenario.tech[[paste0(i, "on")]]    <- data.frame(scenario.tech[[paste0(i, "on")]])
+   
+   # Save offshore vector
+   scenario.tech[[paste0(i, "off")]] <- scenarios[[i]][1:24,offshore]
+   colnames(scenario.tech[[paste0(i, "off")]]) <- country[1:5]
+   rownames(scenario.tech[[paste0(i, "off")]]) <- 1:24
+   scenario.tech[[paste0(i, "off")]] <- data.frame(scenario.tech[[paste0(i, "off")]])
+   # Save load vector
+   scenario.tech[[paste0(i, "load")]] <- scenarios[[i]][1:24,load]
+   colnames(scenario.tech[[paste0(i, "load")]]) <- country
+   rownames(scenario.tech[[paste0(i, "load")]]) <- 1:24
+   scenario.tech[[paste0(i, "load")]] <- data.frame(scenario.tech[[paste0(i, "load")]])
+   
+    
+}
+
+
+
+mean.vecs <- list()
+for (i in 1:30){
+    
+    
+    mean.vecs[[i]] <- apply(scenarios[[i]], 2, mean)
+    
+}
+
+z <- list.rbind(mean.vecs)
+
 #save(medoid.vec, file = "scenario30.rda")
 save(scenarios, file = "scenarios30.rda")
+save(scenario.tech, file = "scenariotech30.rda")
 write.csv(x = medoid.vec, file = "test.csv")
+write.csv(x = scenario.tech, file = "tech.csv")
+
+
+# Save weights fpr scenarios
+weights <- cluster.size/sum(cluster.size)
+
+# Sanity check
+sum(cluster.size) == nrow(dat.original)/24
+
+save(weights, file = "weights30.rda")
+write.csv(x = weights, file = "weights30.csv")
+
+labels.country <- country
+tech <- c("pv", "onshore", "offshore", "load")
+labels.tech    <- cbind((rep(1:30, each = 4)), tech)
+
+write.csv(x = labels.tech, file = "labelscen.csv")
+write.csv(x = country, file = "labelcountry.csv")
+
