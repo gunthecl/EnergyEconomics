@@ -1,38 +1,78 @@
 function load_data(folder::String)
-folder="input data" # determine folder for inputdata
-
-###############################################################################
-                ###load csv and create tables###
-###############################################################################
-
     # load files
-    demand_table    = loadtable(string(folder, "/t_zone_demand.csv"))
-    TechTable       = loadtable(string(folder, "/tech.csv"))
-    StoregesTable   = loadtable(string(folder, "/storages.csv"))
-    PotNonDispTable = loadtable(string(folder, "/PotNonDisp.csv"))
-    PotPumpStorTable= loadtable(string(folder, "/PotPumpStor.csv"))
-    ntc_table       = loadtable(string(folder, "/t_ntc.csv"))
-    solar_table     = loadtable(string(folder, "/t_solar_availability.csv"))
-    onshore_table   = loadtable(string(folder, "/t_wind_off_availability.csv"))
-    offshore_table  = loadtable(string(folder, "/t_wind_on_availability.csv"))
-    policies_table  = loadtable(string(folder, "/t_policies.csv"))
+    tech_table          = loadtable(string(folder, "/tech.csv"))
+    storages_table      = loadtable(string(folder, "/storages.csv"))
+    potNondisp_table    = loadtable(string(folder, "/PotNonDisp.csv"))
+    potStor_table       = loadtable(string(folder, "/PotPumpStor.csv"))
+    ntc_table           = loadtable(string(folder, "/ntc.csv"))
+    policies_table      = loadtable(string(folder, "/policies.csv"))
+
     # derive sets from input data files
-    DISP = select(filter(row -> row.Type=="disp", TechTable), :Technology)
+    DISP = select(filter(row -> row.Type=="disp", tech_table), :Technology)
     DISP = convert(Array, DISP)
 
-    NONDISP = select(filter(row -> row.Type=="nondisp", TechTable), :Technology)
+    NONDISP = select(filter(row -> row.Type=="nondisp", tech_table), :Technology)
     NONDISP = convert(Array, NONDISP)
 
-    TECHNOLOGY = array(select(TechTable, :Technology))
+    TECHNOLOGY = array(select(tech_table, :Technology))
     TECHNOLOGY = convert(Array, TECHNOLOGY)
 
-    ZONES = array(select(PotNonDispTable, :Country))
+    ZONES = array(select(potNondisp_table, :Country))
     ZONES = convert(Array, ZONES)
 
-    STOR = array(select(StoregesTable, :Technology))
+    STOR = array(select(storages_table, :Technology))
     STOR = convert(Array, STOR)
 
-    HOURS = select(demand_table, :Hour)
+    HOURS = collect(1:24)
+
+    ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
+    ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
+
+    potentials_array = hcat([select(potNondisp_table, Symbol(n))
+        for n in NONDISP]...)
+    potentials = NamedArray(PotentialsArray, (ZONES, NONDISP),
+        ("Zones","Nondisp"))
+
+    storPot_array = array(select(potStor_table, :Potential))
+    potPumpStor = NamedArray(StorPotArray, (ZONES,),("Zones",))
+
+    annuities_array = array(select(tech_table, :Annuity))
+    annuities = NamedArray(AnnuitiesArray, (TECHNOLOGY,), ("Technologies",))
+
+    stor_array = array(select(storages_table, :Annuity))
+    annuitiesStor = NamedArray(StorArray, (STOR,), ("Storages",))
+
+    mc = NamedArray(select(tech_table, :MC), (TECHNOLOGY,), ("Technologies",))
+    etaTech = NamedArray(select(tech_table, :eta), (TECHNOLOGY,),
+        ("Technologies",))
+    etaStor = NamedArray(select(storages_table, :eta), (STOR,), ("Storages",))
+    eta     = vcat(EtaTech, EtaStor)
+    # carbon content for implemenation of maximum CO2 emission
+    carbCon = NamedArray(select(tech_table, :CarbCon), (TECHNOLOGY,),
+        ("Technologies",)) # in t/MWh
+
+    # Don't know how to handle this one...
+    #annuity_oc_power    = NamedArray(annuity_oc_power, (STOR,), ("Storage",))
+    #annuity_oc_energy   = NamedArray(annuity_oc_energy, (STOR,), ("Storage",))
+
+    resShare = NamedArray(select(policies_table, :resShare),
+        (ZONES,), ("Zone",))
+
+#=
+    avail_arr_solar     = hcat([select(solar_table, Symbol(z))
+        for z in ZONES]...)
+    avail_arr_onshore   = hcat([select(onshore_table, Symbol(z))
+        for z in ZONES]...)
+    avail_arr_offshore  = hcat([select(offshore_table, Symbol(z))
+        for z in ZONES]...)
+    avail_solar     = NamedArray(avail_arr_solar, (HOURS,ZONES),
+                    ("Hour","Zone"))
+    avail_onshore   = NamedArray(avail_arr_onshore, (HOURS,ZONES),
+                    ("Hour","Zone"))
+    avail_offshore  = NamedArray(avail_arr_offshore, (HOURS,ZONES),
+                    ("Hour","Zone"))
+=#
+
     # sets dictionary
     sets = Dict(
         "Hours"     => HOURS,
@@ -42,57 +82,7 @@ folder="input data" # determine folder for inputdata
         "Nondisp"   => NONDISP,
         "Storage"   => STOR
     )
-    ############################################################################
-                ###derive input parameters from created arrays###
-    ############################################################################
-    demand_array = hcat([select(demand_table, Symbol(z)) for z in ZONES]...)
-    demand = NamedArray(demand_array, (HOURS, ZONES), ("Hour", "Zone"))
 
-    ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
-    ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
-    #potentials of nondisp technologies
-    potentials_array = hcat([select(PotNonDispTable, Symbol(n))
-        for n in NONDISP]...)
-    potentials = NamedArray(PotentialsArray, (ZONES, NONDISP),
-        ("Zones","NondispTech"))
-    #potentials of STOR
-    storPot_array = array(select(PotPumpStorTable, :Potential))
-    potPumpStor = NamedArray(StorPotArray, (ZONES,),("Zones",))
-    #annuites of TECHNOLOGY
-    annuities_array = array(select(TechTable, :Annuity))
-    annuities = NamedArray(AnnuitiesArray, (TECHNOLOGY,), ("Technologies",))
-    #annuities of STOR
-    stor_array = array(select(StoregesTable, :Annuity))
-    annuitiesStor = NamedArray(StorArray, (STOR,), ("Storages",))
-
-    mc = NamedArray(select(TechTable, :MC), (TECHNOLOGY,), ("Technologies",))
-    etaTech = NamedArray(select(TechTable, :eta), (TECHNOLOGY,), ("Technologies",))
-    etaStor = NamedArray(select(StoregesTable, :eta), (STOR,), ("Storeges",))
-    eta     = vcat(EtaTech, EtaStor)
-    #carbon content for implemenation of maximum CO2 emission
-    carbCon = NamedArray(select(TechTable, :CarbCon), (TECHNOLOGY,),
-        ("Technologies",)) #in t/MWh
-
-    # Don't know how to handle this one...
-    #annuity_oc_power    = NamedArray(annuity_oc_power, (STOR,), ("Storage",))
-    #annuity_oc_energy   = NamedArray(annuity_oc_energy, (STOR,), ("Storage",))
-
-    resShare = NamedArray(select(policies_table, :resShare),
-        (ZONES,), ("Zone",))
-
-    avail_arr_solar     = hcat([select(solar_table, Symbol(z))
-        for z in ZONES]...)
-    avail_arr_onshore   = hcat([select(onshore_table, Symbol(z)) 
-        for z in ZONES]...)
-    avail_arr_offshore  = hcat([select(offshore_table, Symbol(z))
-        for z in ZONES]...)
-
-    avail_solar     = NamedArray(avail_arr_solar, (HOURS,ZONES),
-                    ("Hour","Zone"))
-    avail_onshore   = NamedArray(avail_arr_onshore, (HOURS,ZONES),
-                    ("Hour","Zone"))
-    avail_offshore  = NamedArray(avail_arr_offshore, (HOURS,ZONES),
-                    ("Hour","Zone"))
     # parameters dictionary
     param = Dict(
         "Demand"        => demand,

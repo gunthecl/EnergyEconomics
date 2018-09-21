@@ -4,6 +4,7 @@
 #using Plots, StatPlots
 using NamedArrays
 using JuliaDB
+using RData
 using JuMP
 using Gurobi
 
@@ -14,7 +15,7 @@ include("greenfield.jl")
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
-sets, param = load_data("test_data")
+sets, param = load_data("input data")
 results = invest(sets, param, 1:200, GurobiSolver())
 
 # quick Overview
