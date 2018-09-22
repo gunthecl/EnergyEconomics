@@ -16,10 +16,7 @@ include("greenfield.jl")
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
-sets, param = load_data("input data")
-scenarios   = loadRData("test_scenario/stochastic/scenariotech30.rda",
-    "test_scenario/stochastic/weights30.csv", 30, collect(1:24),
-    ["BNL", "DE", "DK", "FR", "GB", "IBE"])
+sets, param = load_data("input_data")
 results = invest(sets, param, 1:200, GurobiSolver())
 
 # quick Overview
@@ -50,10 +47,7 @@ cap = cap[setdiff(1:end, 1), :]
 groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
             ylabel = "installed capacity in MW", framestyle=:box)
 
-# time series plot
-zone = "Zone1"
-timeframe = 500:668 # 1 week
-
+# TODO: time series plot
 
 @userplot Areaplot
 @recipe function f(a::Areaplot)

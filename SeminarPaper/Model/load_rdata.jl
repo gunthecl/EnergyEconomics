@@ -1,5 +1,5 @@
-function loadRData(file_scenario::String, file_weight::String,
-    num_scenarios::Int64, HOURS::Any, ZONES::Any)
+function load_RData(file_scenario::String, file_weight::String,
+    HOURS::Any, ZONES::Any)
     # load RData file
     rData = RData.load(file_scenario, convert=true)
     rData = rData["scenario.tech"] # discard nesting level
@@ -7,6 +7,7 @@ function loadRData(file_scenario::String, file_weight::String,
     weight_table = JuliaDB.loadtable(file_weight)
     weight = select(weight_table, (:weight))
 
+    num_scenarios = length(weight)
     scenarios = Dict()
     for num in collect(1:num_scenarios)
         scen = string("Scenario ", num)
@@ -22,7 +23,7 @@ function loadRData(file_scenario::String, file_weight::String,
         scenarios[scen]["Onshore"]  = NamedArray(on_array, (HOURS, ZONES),
             ("Hours", "Zones"))
         scenarios[scen]["Offshore"] = NamedArray(off_array,
-            (HOURS, filter(e->e≠"IBE",ZONES)), ("Hours", "Zones"))
+            (HOURS, filter(e->e≠"IB",ZONES)), ("Hours", "Zones"))
         scenarios[scen]["Demand"]   = NamedArray(load_array, (HOURS, ZONES),
             ("Hours", "Zones"))
         scenarios[scen]["Weight"]   = weight[num]

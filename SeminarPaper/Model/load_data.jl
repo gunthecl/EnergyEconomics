@@ -30,48 +30,36 @@ function load_data(folder::String)
 
     potentials_array = hcat([select(potNondisp_table, Symbol(n))
         for n in NONDISP]...)
-    potentials = NamedArray(PotentialsArray, (ZONES, NONDISP),
+    potentials = NamedArray(potentials_array, (ZONES, NONDISP),
         ("Zones","Nondisp"))
 
     storPot_array = array(select(potStor_table, :Potential))
-    potPumpStor = NamedArray(StorPotArray, (ZONES,),("Zones",))
+    potPumpStor = NamedArray(storPot_array, (ZONES,),("Zones",))
 
-    annuities_array = array(select(tech_table, :Annuity))
-    annuities = NamedArray(AnnuitiesArray, (TECHNOLOGY,), ("Technologies",))
+    annuity_array = array(select(tech_table, :Annuity))
+    annuity = NamedArray(annuity_array, (TECHNOLOGY,), ("Technologies",))
 
-    stor_array = array(select(storages_table, :Annuity))
-    annuitiesStor = NamedArray(StorArray, (STOR,), ("Storages",))
+    storOCPower_array = array(select(storages_table, :annuity_oc_power))
+    annuity_oc_power = NamedArray(storOCPower_array, (STOR,), ("Storages",))
+
+    storOCEnergy_array = array(select(storages_table, :annuity_oc_energy))
+    annuity_oc_energy = NamedArray(storOCEnergy_array, (STOR,), ("Storages",))
 
     mc = NamedArray(select(tech_table, :MC), (TECHNOLOGY,), ("Technologies",))
     etaTech = NamedArray(select(tech_table, :eta), (TECHNOLOGY,),
         ("Technologies",))
     etaStor = NamedArray(select(storages_table, :eta), (STOR,), ("Storages",))
-    eta     = vcat(EtaTech, EtaStor)
+    #eta     = vcat(etaTech, etaStor)
     # carbon content for implemenation of maximum CO2 emission
     carbCon = NamedArray(select(tech_table, :CarbCon), (TECHNOLOGY,),
         ("Technologies",)) # in t/MWh
 
-    # Don't know how to handle this one...
-    #annuity_oc_power    = NamedArray(annuity_oc_power, (STOR,), ("Storage",))
-    #annuity_oc_energy   = NamedArray(annuity_oc_energy, (STOR,), ("Storage",))
-
     resShare = NamedArray(select(policies_table, :resShare),
         (ZONES,), ("Zone",))
 
-#=
-    avail_arr_solar     = hcat([select(solar_table, Symbol(z))
-        for z in ZONES]...)
-    avail_arr_onshore   = hcat([select(onshore_table, Symbol(z))
-        for z in ZONES]...)
-    avail_arr_offshore  = hcat([select(offshore_table, Symbol(z))
-        for z in ZONES]...)
-    avail_solar     = NamedArray(avail_arr_solar, (HOURS,ZONES),
-                    ("Hour","Zone"))
-    avail_onshore   = NamedArray(avail_arr_onshore, (HOURS,ZONES),
-                    ("Hour","Zone"))
-    avail_offshore  = NamedArray(avail_arr_offshore, (HOURS,ZONES),
-                    ("Hour","Zone"))
-=#
+    scenarios = load_RData("test_scenario/stochastic/scenariotech30.rda",
+        "test_scenario/stochastic/weights30.csv", HOURS, ZONES)
+    SCENARIOS = collect(keys(scenarios))
 
     # sets dictionary
     sets = Dict(
@@ -80,22 +68,21 @@ function load_data(folder::String)
         "Tech"      => TECHNOLOGY,
         "Disp"      => DISP,
         "Nondisp"   => NONDISP,
-        "Storage"   => STOR
+        "Storage"   => STOR,
+        "Scenarios" => SCENARIOS
     )
 
     # parameters dictionary
     param = Dict(
-        "Demand"        => demand,
-        "NTC"           => ntc,
-        "PV"            => avail_solar,
-        "WindOnshore"   => avail_onshore,
-        "WindOffshore"  => avail_offshore,
-        "Efficiency"    => eta,
-        "MarginalCost"  => mc,
-        "Annuity"       => annuity,
-        "AnnuityPower"  => annuity_oc_power,
-        "AnnuityEnergy" => annuity_oc_energy,
-        "ResShare"      => resShare
+        "NTC"                   => ntc,
+        "Tech Efficiency"       => etaTech,
+        "Storage Efficiency"    => etaStor,
+        "MarginalCost"          => mc,
+        "Annuity"               => annuity,
+        "AnnuityPower"          => annuity_oc_power,
+        "AnnuityEnergy"         => annuity_oc_energy,
+        "ResShare"              => resShare,
+        "Scenario Data"         => scenarios
     )
     return sets, param
 end
