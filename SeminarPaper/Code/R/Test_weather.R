@@ -26,7 +26,7 @@ lapply(neededPackages, function(x) suppressPackageStartupMessages(
 ################################################################################
 
 ## Change path to working directory
-wd.path = "/Users/claudiaguenther/documents/EnergyEconomics/SeminarPaper/Code/R/"
+wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
 
 
 # Read in wind and pv data set
@@ -43,47 +43,46 @@ source("HelperFunctions.R")
 
 # Use weighted average for Spain & Portugal, Luxembourg & Netherlands & Belgium
 
-dat.res$BNL_pv_national_current   <- (dat.res$BE_pv_national_current*0.426 
+dat.res$LU_pv_national_current   <- (dat.res$BE_pv_national_current*0.426 
                                     + dat.res$LU_pv_national_current*0.034
                                     + dat.res$NL_pv_national_current*0.54)
 
-dat.res$IBE_pv_national_current   <- (dat.res$ES_pv_national_current*0.845 
+dat.res$IB_pv_national_current   <- (dat.res$ES_pv_national_current*0.845 
                                    + dat.res$PT_pv_national_current*0.155)
 
-dat.res$BNL_wind_onshore_current  <- (dat.res$BE_wind_onshore_current*0.426 
+dat.res$LU_wind_onshore_current  <- (dat.res$BE_wind_onshore_current*0.426 
                                      + dat.res$LU_wind_national_current*0.034
                                      + dat.res$NL_wind_onshore_current*0.54)
 
-dat.res$IBE_wind_onshore_current  <-  (dat.res$ES_wind_national_current*0.845 
+dat.res$IB_wind_onshore_current  <-  (dat.res$ES_wind_national_current*0.845 
                                      + dat.res$PT_wind_national_current*0.155)
 
-dat.res$BNL_wind_offshore_current <- (dat.res$BE_wind_offshore_current*0.441 
+dat.res$LU_wind_offshore_current <- (dat.res$BE_wind_offshore_current*0.441 
                                     + dat.res$NL_wind_offshore_current*0.559)
 
 # Sum load for Spain & Portugal, Luxembourg & Netherlands & Belgium
 
-dat.load.2015$BNL_load_entsoe_power_statistics <-  ( dat.load.2015$BE_load_entsoe_power_statistics
+dat.load.2015$LU_load_entsoe_power_statistics <-  ( dat.load.2015$BE_load_entsoe_power_statistics
                                                    + dat.load.2015$LU_load_entsoe_power_statistics
                                                    + dat.load.2015$NL_load_entsoe_power_statistics)
     
-dat.load.2015$IBE_load_entsoe_power_statistics <-  ( dat.load.2015$ES_load_entsoe_power_statistics
+dat.load.2015$IB_load_entsoe_power_statistics <-  ( dat.load.2015$ES_load_entsoe_power_statistics
                                                      + dat.load.2015$PT_load_entsoe_power_statistics)
 
-
 # Select columns 
-var.vec     <- c("BNL_pv_national_current", "BNL_wind_onshore_current", "BNL_wind_offshore_current",
+var.vec     <- c("LU_pv_national_current", "LU_wind_onshore_current", "LU_wind_offshore_current",
                  "DE_pv_national_current", "DE_wind_onshore_current", "DE_wind_offshore_current",
                  "DK_pv_national_current", "DK_wind_onshore_current", "DK_wind_offshore_current",
                   "FR_pv_national_current", "FR_wind_onshore_current", "FR_wind_offshore_current",
                   "GB_pv_national_current", "GB_wind_onshore_current", "GB_wind_offshore_current",
-                  "IBE_pv_national_current", "IBE_wind_onshore_current")
+                  "IB_pv_national_current", "IB_wind_onshore_current")
 
-var.vec.load <- c("BNL_load_entsoe_power_statistics",
+var.vec.load <- c("LU_load_entsoe_power_statistics",
                   "DE_load_entsoe_power_statistics", 
                   "DK_load_entsoe_power_statistics",
                   "FR_load_entsoe_power_statistics",
                   "GB_load_entsoe_power_statistics",
-                  "IBE_load_entsoe_power_statistics")
+                  "IB_load_entsoe_power_statistics")
 
 dat.original <- dat.res[,var.vec]
 
@@ -507,7 +506,7 @@ onshore  <- seq(from = 2, to = 17, by = 3)
 offshore <- seq(from = 3, to = 17, by = 3)
 load     <- 18:23
 
-country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
+country <- c("LU", "DE", "DK", "FR", "UK", "IB")
 
 for (i in 1:30){
 

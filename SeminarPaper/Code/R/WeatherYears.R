@@ -25,7 +25,7 @@ lapply(neededPackages, function(x) suppressPackageStartupMessages(
 ################################################################################
 
 ## Change path to working directory
-wd.path = "/Users/claudiaguenther/documents/EnergyEconomics/SeminarPaper/Code/R/"
+wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
 
 
 # Read in wind and pv data set
@@ -39,25 +39,25 @@ setwd(wd.path)
 
 # Use weighted average for Spain & Portugal, Luxembourg & Netherlands & Belgium
 
-dat.res$BN_pv_national_current   <- (dat.res$BE_pv_national_current*0.426 
+dat.res$LU_pv_national_current   <- (dat.res$BE_pv_national_current*0.426 
                                       + dat.res$LU_pv_national_current*0.034
                                       + dat.res$NL_pv_national_current*0.54)
 
 dat.res$IB_pv_national_current   <- (dat.res$ES_pv_national_current*0.845 
                                       + dat.res$PT_pv_national_current*0.155)
 
-dat.res$BN_wind_onshore_current  <- (dat.res$BE_wind_onshore_current*0.426 
+dat.res$LU_wind_onshore_current  <- (dat.res$BE_wind_onshore_current*0.426 
                                       + dat.res$LU_wind_national_current*0.034
                                       + dat.res$NL_wind_onshore_current*0.54)
 
 dat.res$IB_wind_onshore_current  <-  (dat.res$ES_wind_national_current*0.845 
                                        + dat.res$PT_wind_national_current*0.155)
 
-dat.res$BN_wind_offshore_current <- (dat.res$BE_wind_offshore_current*0.441 
+dat.res$LU_wind_offshore_current <- (dat.res$BE_wind_offshore_current*0.441 
                                       + dat.res$NL_wind_offshore_current*0.559)
 
 # Select columns 
-var.vec     <- c("BN_pv_national_current", "BN_wind_onshore_current", "BN_wind_offshore_current",
+var.vec     <- c("LU_pv_national_current", "LU_wind_onshore_current", "LU_wind_offshore_current",
                  "DE_pv_national_current", "DE_wind_onshore_current", "DE_wind_offshore_current",
                  "DK_pv_national_current", "DK_wind_onshore_current", "DK_wind_offshore_current",
                  "FR_pv_national_current", "FR_wind_onshore_current", "FR_wind_offshore_current",
@@ -145,7 +145,7 @@ pv       <- seq(from = 1, to = 17, by = 3)
 onshore  <- seq(from = 2, to = 17, by = 3)
 offshore <- seq(from = 3, to = 17, by = 3)
 
-country <- c("BNL", "DE", "DK", "FR", "GB", "IBE")
+country <- c("LU", "DE", "DK", "FR", "UK", "IB")
 
 
 for (i in (c(1987, 1998, 2003,2010,2015))){
