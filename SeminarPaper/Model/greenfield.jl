@@ -2,7 +2,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
                 solver=solver)
 
     HOURS   = collect(timeset)
-    #SCEN    = sets["Scenarios"]
+    SCEN    = sets["Scenarios"]
     TECH    = sets["Tech"]
     DISP    = sets["Disp"]
     NONDISP = sets["Nondisp"]
@@ -12,35 +12,35 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
     Invest = Model(solver=GurobiSolver())
 
     # generation
-    # TODO: expand variables by scenario
-    @variable(Invest, G[HOURS, ZONES, TECH]      >= 0)  # electricity generation
-    @variable(Invest, G_STOR[HOURS, ZONES, STOR] >= 0)  # storage generation
-    @variable(Invest, D_STOR[HOURS, ZONES, STOR] >= 0)  # storage consumption
-    @variable(Invest, L_STOR[HOURS, ZONES, STOR] >= 0)  # storage level
+    @variable(Invest, G[SCEN, HOURS, ZONES, TECH]      >= 0)  # electricity generation
+    @variable(Invest, G_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage generation
+    @variable(Invest, D_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage consumption
+    @variable(Invest, L_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage level
     # capacities
     @variable(Invest, CAP[ZONES, TECH]      >= 0) # installed capacity
     @variable(Invest, CAP_ST_E[ZONES, STOR] >= 0) # storage energy
     @variable(Invest, CAP_ST_P[ZONES, STOR] >= 0) # storage power
     # renewables
-    @variable(Invest, CU[HOURS, ZONES, NONDISP] >= 0) # curtailment
+    @variable(Invest, CU[SCEN, HOURS, ZONES, NONDISP] >= 0) # curtailment
     # exports
-    @variable(Invest, EX[HOURS, ZONES, ZONES] >= 0)
+    @variable(Invest, EX[SCEN, HOURS, ZONES, ZONES] >= 0)
     # fix variables
-    for zone in ZONES, stor in STOR
-        JuMP.fix(G_STOR[HOURS[1], zone, stor], 0)
-        JuMP.fix(L_STOR[HOURS[1], zone, stor], 0)
+    for scen in SCEN, zone in ZONES, stor in STOR
+        JuMP.fix(G_STOR[scen, HOURS[1], zone, stor], 0)
+        JuMP.fix(L_STOR[scen, HOURS[1], zone, stor], 0)
     end
     # objective function
     # TODO: OC energy and power may be replaced by MC; expand by scenarios
     @objective(Invest, Min,
-        sum(param["MarginalCost"][tech] * G[hour, zone, tech]
-            for hour in HOURS, tech in TECH, zone in ZONES)
         + sum(param["Annuity"][tech] * CAP[zone, tech]
             for tech in TECH, zone in ZONES)
         + 0.5 * sum(param["AnnuityPower"][stor] * CAP_ST_P[zone, stor]
             for stor in STOR, zone in ZONES)
         + 0.5 * sum(param["AnnuityEnergy"][stor] * CAP_ST_E[zone, stor]
             for stor in STOR, zone in ZONES)
+        + sum(param["MarginalCost"][tech] * G[hour, zone, tech]
+            for hour in HOURS, tech in TECH, zone in ZONES)
+
         );
     # constraints
     # TODO: Expand by scenarios

@@ -18,15 +18,15 @@ function load_RData(file_scenario::String, file_weight::String,
         off_array   = Array(rData[string(num,"off")])
         load_array  = Array(rData[string(num,"load")])
         # fill in NamedArrays
-        scenarios[scen]["PV"]       = NamedArray(pv_array, (HOURS, ZONES),
+        scenarios[scen]["PV"]           = NamedArray(pv_array, (HOURS, ZONES),
             ("Hours", "Zones"))
-        scenarios[scen]["Onshore"]  = NamedArray(on_array, (HOURS, ZONES),
+        scenarios[scen]["WindOnshore"]  = NamedArray(on_array, (HOURS, ZONES),
             ("Hours", "Zones"))
-        scenarios[scen]["Offshore"] = NamedArray(off_array,
+        scenarios[scen]["WindOffshore"] = NamedArray(off_array,
             (HOURS, filter(e->e≠"IB",ZONES)), ("Hours", "Zones"))
-        scenarios[scen]["Demand"]   = NamedArray(load_array, (HOURS, ZONES),
+        scenarios[scen]["Demand"]       = NamedArray(load_array, (HOURS, ZONES),
             ("Hours", "Zones"))
-        scenarios[scen]["Weight"]   = weight[num]
+        scenarios[scen]["Weight"]       = weight[num]
     end
     return scenarios
 end
