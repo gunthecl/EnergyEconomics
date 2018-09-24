@@ -22,7 +22,8 @@ function load_RData(file_scenario::String, file_weight::String,
             ("Hours", "Zones"))
         scenarios[scen]["WindOnshore"]  = NamedArray(on_array, (HOURS, ZONES),
             ("Hours", "Zones"))
-        scenarios[scen]["WindOffshore"] = NamedArray(off_array,
+            # TODO: append zeros for IB zone instead of cuting out
+        scenarios[scen]["WindOffshore"] = NamedArray([off_array,zeros(24,1)
             (HOURS, filter(e->e≠"IB",ZONES)), ("Hours", "Zones"))
         scenarios[scen]["Demand"]       = NamedArray(load_array, (HOURS, ZONES),
             ("Hours", "Zones"))
