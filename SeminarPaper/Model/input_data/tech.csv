@@ -1,8 +1,8 @@
 Technology,Type,Annuity,CarbCon,MC,eta
-Lignite,disp,139293.73,0.9231,52.38,0.39
-Coal,disp,162104.21,0.8434,55.01,0.415
-Gas,disp,78710.89,0.4040,74.12,0.495
-WindOnshore,nondisp,122834.40,0.0000,0.00,1
-WindOffshore,nondisp,268465.43,0.0000,0.00,1
-PVGround,nondisp,69917.20,0,0,1
-PVRoof,nondisp,85965.79,0,0,1
+Lignite,disp,139293.7285,0.923076923,52.38,0.39
+Coal,disp,162104.2147,0.843373494,55.01,0.415
+Gas,disp,86867.73175,0.404040404,74.12,0.495
+WindOnshore,nondisp,122834.4039,0,0,1
+WindOffshore,nondisp,268465.4269,0,0,1
+PVGround,nondisp,69917.20195,0,0,1
+PVRoof,nondisp,85965.78849,0,0,1
