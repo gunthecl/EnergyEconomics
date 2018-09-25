@@ -18,14 +18,7 @@ include("greenfield.jl")
 # load input data
 # ------------------------------------------------------------------------------
 sets, param = load_data("input_data")
-#=
-sets["Nondisp"] = filter(e -> e != "PVGround", sets["Nondisp"])
-sets["Nondisp"] = filter(e -> e != "PVRoof", sets["Nondisp"])
-sets["Nondisp"] = append!(["PV"], sets["Nondisp"])
-sets["Tech"] = filter(e -> e != "PVGround", sets["Tech"])
-sets["Tech"] = filter(e -> e != "PVRoof", sets["Tech"])
-sets["Tech"] = append!(["PV"], sets["Tech"])
-=#
+
 results = invest(sets, param, 1:24, GurobiSolver())
 
 # quick Overview

@@ -83,7 +83,7 @@ function load_data(folder::String)
         "AnnuityPower"          => annuity_oc_power,
         "AnnuityEnergy"         => annuity_oc_energy,
         "ResShare"              => resShare,
-        "Tech Potentials"       => potentials,
+        "RES Potentials"        => potentials,
         "Stor Potentials"       => potPumpStor,
         "Scenario Data"         => scenarios
     )

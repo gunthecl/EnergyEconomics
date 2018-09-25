@@ -1,6 +1,6 @@
-#function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
-#                solver=solver)
-timeset = 1:24
+function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
+                solver=solver)
+
     HOURS   = collect(timeset)
     SCEN    = sets["Scenarios"]
     TECH    = sets["Tech"]
@@ -126,26 +126,36 @@ timeset = 1:24
         end
     end
 
-    #TODO: add RES/storage maximum capacity restriction per zone
+    @constraint(Invest, RESMax[zone=ZONES, ndisp=NONDISP],
+        CAP[zone, ndisp] <= param["RES Potentials"][zone, ndisp]
+        );
 
-    @constraint(Invest, ResQuota[zone=ZONES],
-        sum(G[hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
+    @constraint(Invest, PumpStorMaxPower[zone=ZONES, stor=["PumpedStor"]],
+        CAP_ST_P[zone, stor] <= param["Stor Potentials"][zone]
+        );
+
+    @constraint(Invest, ResQuota[scen=SCEN, zone=ZONES],
+        sum(G[scen, hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
         ==
         param["ResShare"][zone]/100 *
-        sum(param["Demand"][hour] for hour in HOURS)
+        sum(param["Scenario Data"][scen]["Demand"][hour, zone]
+            for hour in HOURS)
     );
     # call solver
     status = solve(Invest)
     # format solution
-    # TODO: account for scenarios
-    generation = NamedArray(getvalue(G.innerArray), (HOURS, ZONES, TECH),
-        ("Hour", "Zone", "Technology"))
-    storage_gen = NamedArray(getvalue(G_STOR.innerArray), (HOURS, ZONES, STOR),
-        ("Hour", "Zone", "Technology"))
-    storage_con = NamedArray(getvalue(D_STOR.innerArray), (HOURS, ZONES, STOR),
-        ("Hour", "Zone", "Technology"))
-    storage_lvl = NamedArray(getvalue(L_STOR.innerArray), (HOURS, ZONES, STOR),
-        ("Hour", "Zone", "Technology"))
+    generation  = NamedArray(
+        getvalue(G.innerArray), (SCEN, HOURS, ZONES, TECH),
+        ("Scenario", "Hour", "Zone", "Technology"))
+    storage_gen = NamedArray(
+        getvalue(G_STOR.innerArray), (SCEN, HOURS, ZONES, STOR),
+        ("Scenario", "Hour", "Zone", "Technology"))
+    storage_con = NamedArray(
+        getvalue(D_STOR.innerArray), (SCEN, HOURS, ZONES, STOR),
+        ("Scenario", "Hour", "Zone", "Technology"))
+    storage_lvl = NamedArray(
+        getvalue(L_STOR.innerArray), (SCEN, HOURS, ZONES, STOR),
+        ("Scenario", "Hour", "Zone", "Technology"))
 
     cap = NamedArray(getvalue(CAP.innerArray), (ZONES, TECH),
         ("Zone", "Technology"))
@@ -153,29 +163,33 @@ timeset = 1:24
         ("Zone", "Technology"))
     cap_stor_power = NamedArray(getvalue(CAP_ST_P.innerArray), (ZONES, STOR),
         ("Zone", "Technology"))
-    curtailment = NamedArray(getvalue(CU.innerArray), (HOURS, ZONES, NONDISP),
-        ("Hour", "Zone", "Technology"))
-    exchange = NamedArray(getvalue(EX.innerArray), (HOURS, ZONES, ZONES),
-        ("Hour", "From_Zone", "To_Zone"))
-    price = NamedArray(getdual(EnergyBalance).innerArray, (HOURS, ZONES),
-        ("Hour", "Zone"))
+    curtailment = NamedArray(getvalue(CU.innerArray),
+        (SCEN, HOURS, ZONES, NONDISP),
+        ("Scenario", "Hour", "Zone", "Technology"))
+    exchange = NamedArray(getvalue(EX.innerArray), (SCEN, HOURS, ZONES, ZONES),
+        ("Scenario", "Hour", "From_Zone", "To_Zone"))
+    price = NamedArray(getdual(EnergyBalance).innerArray, (SCEN, HOURS, ZONES),
+        ("Scenario", "Hour", "Zone"))
 
     # store results
     results = Dict()
     for zone in ZONES
         results[zone] = Dict()
-        results[zone]["Generation"] = generation[:, zone, :]
-        results[zone]["Storage Generation"] = storage_gen[:, zone, :]
-        results[zone]["Storage Consumption"] = storage_con[:, zone, :]
-        results[zone]["Storage Level"] = storage_lvl[:, zone, :]
+        for scen in SCEN
+            results[zone][scen] = Dict()
+            results[zone][scen]["Generation"] = generation[scen, :, zone, :]
+            results[zone][scen]["Storage Generation"] = storage_gen[scen, :, zone, :]
+            results[zone][scen]["Storage Consumption"] = storage_con[scen, :, zone, :]
+            results[zone][scen]["Storage Level"] = storage_lvl[scen, :, zone, :]
+            results[zone][scen]["Curtailment"] = curtailment[scen, :, zone, :]
+            results[zone][scen]["Exchange"] = exchange[scen, :, :, zone]
+            results[zone][scen]["Price"] = price[scen, :, zone]
+        end
         results[zone]["Capacity"] = cap[zone, :]
         results[zone]["Storage Energy"] = cap_stor_energy[zone, :]
         results[zone]["Storage Power"] = cap_stor_power[zone, :]
-        results[zone]["Curtailment"] = curtailment[:, zone, :]
-        results[zone]["Exchange"] = exchange[:, :, zone]
-        results["Price"] = price
     end
 
-    #return results
+    return results
 
 end
