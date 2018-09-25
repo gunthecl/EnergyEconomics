@@ -1,8 +1,8 @@
-function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
-                solver=solver)
-
+#function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
+#                solver=solver)
+timeset = 1:24
     HOURS   = collect(timeset)
-    #SCEN    = sets["Scenarios"]
+    SCEN    = sets["Scenarios"]
     TECH    = sets["Tech"]
     DISP    = sets["Disp"]
     NONDISP = sets["Nondisp"]
@@ -12,102 +12,121 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
     Invest = Model(solver=GurobiSolver())
 
     # generation
-    # TODO: expand variables by scenario
-    @variable(Invest, G[HOURS, ZONES, TECH]      >= 0)  # electricity generation
-    @variable(Invest, G_STOR[HOURS, ZONES, STOR] >= 0)  # storage generation
-    @variable(Invest, D_STOR[HOURS, ZONES, STOR] >= 0)  # storage consumption
-    @variable(Invest, L_STOR[HOURS, ZONES, STOR] >= 0)  # storage level
+    @variable(Invest, G[SCEN, HOURS, ZONES, TECH]      >= 0)  # electricity generation
+    @variable(Invest, G_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage generation
+    @variable(Invest, D_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage consumption
+    @variable(Invest, L_STOR[SCEN, HOURS, ZONES, STOR] >= 0)  # storage level
     # capacities
     @variable(Invest, CAP[ZONES, TECH]      >= 0) # installed capacity
     @variable(Invest, CAP_ST_E[ZONES, STOR] >= 0) # storage energy
     @variable(Invest, CAP_ST_P[ZONES, STOR] >= 0) # storage power
     # renewables
-    @variable(Invest, CU[HOURS, ZONES, NONDISP] >= 0) # curtailment
+    @variable(Invest, CU[SCEN, HOURS, ZONES, NONDISP] >= 0) # curtailment
     # exports
-    @variable(Invest, EX[HOURS, ZONES, ZONES] >= 0)
+    @variable(Invest, EX[SCEN, HOURS, ZONES, ZONES] >= 0)
     # fix variables
-    for zone in ZONES, stor in STOR
-        JuMP.fix(G_STOR[HOURS[1], zone, stor], 0)
-        JuMP.fix(L_STOR[HOURS[1], zone, stor], 0)
+    for scen in SCEN, zone in ZONES, stor in STOR
+        JuMP.fix(G_STOR[scen, HOURS[1], zone, stor], 0)
+        JuMP.fix(L_STOR[scen, HOURS[1], zone, stor], 0)
     end
     # objective function
-    # TODO: OC energy and power may be replaced by MC; expand by scenarios
     @objective(Invest, Min,
-        sum(param["MarginalCost"][tech] * G[hour, zone, tech]
-            for hour in HOURS, tech in TECH, zone in ZONES)
         + sum(param["Annuity"][tech] * CAP[zone, tech]
             for tech in TECH, zone in ZONES)
         + 0.5 * sum(param["AnnuityPower"][stor] * CAP_ST_P[zone, stor]
             for stor in STOR, zone in ZONES)
         + 0.5 * sum(param["AnnuityEnergy"][stor] * CAP_ST_E[zone, stor]
             for stor in STOR, zone in ZONES)
+        + sum(param["Scenario Data"][scen]["Weight"] *
+            param["MarginalCost"][tech] * G[scen, hour, zone, tech]
+            for scen in SCEN, hour in HOURS, tech in TECH, zone in ZONES)
         );
     # constraints
-    # TODO: Expand by scenarios
-    @constraint(Invest, EnergyBalance[hour=HOURS, zone=ZONES],
-        sum(G[hour, zone, tech] for tech in TECH)
-        + sum(G_STOR[hour, zone, stor] for stor in STOR)
+    @constraint(Invest, EnergyBalance[scen=SCEN, hour=HOURS, zone=ZONES],
+        sum(G[scen, hour, zone, tech] for tech in TECH)
+        + sum(G_STOR[scen, hour, zone, stor] for stor in STOR)
         ==
-        param["Demand"][hour, zone]
-        - sum(EX[hour, from_zone, zone] for from_zone in ZONES)
-        + sum(EX[hour, zone, to_zone] for to_zone in ZONES)
-        + sum(D_STOR[hour, zone, stor] for stor in STOR)
+        param["Scenario Data"][scen]["Demand"][hour, zone]
+        - sum(EX[scen, hour, from_zone, zone] for from_zone in ZONES)
+        + sum(EX[scen, hour, zone, to_zone] for to_zone in ZONES)
+        + sum(D_STOR[scen, hour, zone, stor] for stor in STOR)
     );
 
-    @constraint(Invest, NTC[hour=HOURS, to_zone=ZONES, from_zone=ZONES],
-        EX[hour, from_zone, to_zone] <= param["NTC"][from_zone, to_zone]
+    @constraint(Invest, NTC[scen=SCEN, hour=HOURS, to_zone=ZONES,
+        from_zone=ZONES],
+        EX[scen, hour, from_zone, to_zone] <= param["NTC"][from_zone, to_zone]
     );
 
-    @constraint(Invest, MaxGeneration[hour=HOURS, zone=ZONES, disp=DISP],
-        G[hour, zone, disp] <= CAP[zone, disp]
+    @constraint(Invest, MaxGeneration[scen=SCEN, hour=HOURS, zone=ZONES,
+        disp=DISP],
+        G[scen, hour, zone, disp] <= CAP[zone, disp]
     );
 
-    @constraint(Invest, StorageLevel[hour=HOURS, zone=ZONES, stor=STOR;
-        hour != HOURS[1]],
-        L_STOR[hour, zone, stor]
+    @constraint(Invest, StorageLevel[scen=SCEN, hour=HOURS, zone=ZONES,
+        stor=STOR; hour != HOURS[1]],
+        L_STOR[scen, hour, zone, stor]
         ==
-        L_STOR[hour-1, zone, stor] + param["Efficiency"][stor] *
-        D_STOR[hour, zone, stor] - G_STOR[hour, zone, stor]
+        L_STOR[scen, hour-1, zone, stor] + param["Storage Efficiency"][stor] *
+        D_STOR[scen, hour, zone, stor] - G_STOR[scen, hour, zone, stor]
     );
 
-    @constraint(Invest, StorageLevelEquality[zone=ZONES, stor=STOR],
-        L_STOR[HOURS[1], zone, stor] ==  L_STOR[HOURS[end], zone, stor]
+    @constraint(Invest, StorageLevelEquality[scen=SCEN, zone=ZONES, stor=STOR],
+        L_STOR[scen, HOURS[1], zone, stor]
+        ==
+        L_STOR[scen, HOURS[end], zone, stor]
     );
 
-    @constraint(Invest, MaxStorageLevel[hour=HOURS, zone=ZONES, stor=STOR],
-        L_STOR[hour, zone, stor] <= CAP_ST_E[zone, stor]
+    @constraint(Invest, MaxStorageLevel[scen=SCEN, hour=HOURS, zone=ZONES,
+        stor=STOR],
+        L_STOR[scen, hour, zone, stor] <= CAP_ST_E[zone, stor]
     );
 
-    @constraint(Invest, MaxStorageGeneration[hour=HOURS, zone=ZONES, stor=STOR],
-        G_STOR[hour, zone, stor] <= CAP_ST_P[zone, stor]
+    @constraint(Invest, MaxStorageGeneration[scen=SCEN, hour=HOURS,
+        zone=ZONES, stor=STOR],
+        G_STOR[scen, hour, zone, stor] <= CAP_ST_P[zone, stor]
     );
 
-    @constraint(Invest, MaxStorageWithdraw[hour=HOURS, zone=ZONES, stor=STOR],
-        D_STOR[hour, zone, stor] <= CAP_ST_P[zone, stor]
+    @constraint(Invest, MaxStorageWithdraw[scen=SCEN, hour=HOURS, zone=ZONES,
+        stor=STOR],
+        D_STOR[scen, hour, zone, stor] <= CAP_ST_P[zone, stor]
     );
 
-    @constraint(Invest, StorageGeneration[hour=HOURS, zone=ZONES, stor=STOR;
-        hour != HOURS[1]],
-        G_STOR[hour, zone, stor] <= L_STOR[hour-1, zone, stor]
+    @constraint(Invest, StorageGeneration[scen=SCEN, hour=HOURS, zone=ZONES,
+        stor=STOR; hour != HOURS[1]],
+        G_STOR[scen, hour, zone, stor] <= L_STOR[scen, hour-1, zone, stor]
     );
 
-    @constraint(Invest, StorageWithdraw[hour=HOURS, zone=ZONES, stor=STOR;
-        hour != HOURS[1]],
-        D_STOR[hour, zone, stor]
+    @constraint(Invest, StorageWithdraw[scen=SCEN, hour=HOURS, zone=ZONES,
+        stor=STOR; hour != HOURS[1]],
+        D_STOR[scen, hour, zone, stor]
         <=
-        CAP_ST_P[zone, stor] - L_STOR[hour-1, zone, stor]
+        CAP_ST_P[zone, stor] - L_STOR[scen, hour-1, zone, stor]
     );
 
-    lenResConst = length(HOURS)*length(ZONES)*length(NONDISP)
+    lenResConst = length(SCEN)*length(HOURS)*length(ZONES)*length(NONDISP)
     i = 1
     @constraintref ResAvailability[1:lenResConst]
-    for hour in HOURS, zone in ZONES, ndisp in NONDISP
-        ResAvailability[i] = @constraint(Invest,
-            G[hour, zone, ndisp]
-            <=
-            param[ndisp][hour, zone] * CAP[zone, ndisp]);
-        i = i + 1
+    for scen in SCEN, hour in HOURS, zone in ZONES, ndisp in NONDISP
+        if ndisp != "PVRoof" && ndisp != "PVGround"
+            ResAvailability[i] = @constraint(Invest,
+                G[scen, hour, zone, ndisp]
+                <=
+                param["Scenario Data"][scen][ndisp][hour, zone] *
+                CAP[zone, ndisp]
+                );
+            i = i + 1
+        else
+            ResAvailability[i] = @constraint(Invest,
+                G[scen, hour, zone, ndisp]
+                <=
+                param["Scenario Data"][scen]["PV"][hour, zone] *
+                CAP[zone, ndisp]
+                );
+            i = i+1
+        end
     end
+
+    #TODO: add RES/storage maximum capacity restriction per zone
 
     @constraint(Invest, ResQuota[zone=ZONES],
         sum(G[hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
@@ -157,6 +176,6 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         results["Price"] = price
     end
 
-    return results
+    #return results
 
 end
