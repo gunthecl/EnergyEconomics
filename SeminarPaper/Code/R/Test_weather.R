@@ -202,8 +202,6 @@ medoid.vec    <- dat.unscaled[medoid.IND,]
 # Determine cluster sizes
 cluster.size  <- table(clusters)
 
-######################################################################
-# Rescale replicated data set
 
 
 ######################################################################
@@ -228,6 +226,7 @@ GER.load.repl <- data.frame(list.rbind(days.list))
 GER.load.repl <- sort(unlist(GER.load.repl), decreasing = TRUE)
 GER.load.org  <- dat.original[,col.load.GER.org]
 GER.load.org  <- sort(GER.load.org, decreasing = TRUE)
+
 
 GER.load.both <- as.data.frame(cbind(GER.load.org, GER.load.repl))
 GER.load.both$hour <- 1:nrow(GER.load.both)
@@ -317,7 +316,7 @@ GER.wind_on.org  <- sort(GER.wind_on.org, decreasing = TRUE)
 
 # Find columns of German offshore wind data
 col.wind_off.GER     <- grepl("DE_wind_off", colnames(medoid.vec))
-GER.load         <- medoid.vec[,col.wind_off.GER]
+GER.load             <- medoid.vec[,col.wind_off.GER]
 col.wind_off.GER.org <- grepl("DE_wind_off", colnames(dat.original))
 
 # Mutiply each cluster with its size
@@ -335,9 +334,17 @@ GER.wind_off.repl <- sort(unlist(GER.wind_off.repl), decreasing = TRUE)
 GER.wind_off.org  <- dat.original[,col.wind_off.GER.org]
 GER.wind_off.org  <- sort(GER.wind_off.org, decreasing = TRUE)
 
+# Rescale replicated data set 
+gamma             <- (mean(GER.wind_off.repl)- mean(GER.wind_off.org))
+GER.wind_off.repl <- scale(GER.wind_off.repl, center = gamma, scale = FALSE)
+gamma             <- (mean(GER.wind_on.repl)- mean(GER.wind_on.org))
+GER.wind_on.repl <- scale(GER.wind_on.repl, center = gamma, scale = FALSE)
+
 GER.wind.both      <- as.data.frame(cbind(GER.wind_on.org,  GER.wind_on.repl,
                                           GER.wind_off.org, GER.wind_off.repl))
-GER.wind.both$hour <- 1:nrow(GER.wind_on.both)
+
+GER.wind.both$hour <- 1:nrow(GER.wind.both)
+
 
 ggplot(GER.wind.both, aes(x = hour)) + 
   geom_line(aes(y = GER.wind_on.org, colour = "Original onshore series" )) + 
@@ -347,7 +354,7 @@ ggplot(GER.wind.both, aes(x = hour)) +
   scale_colour_manual("", 
                       breaks = c("Original onshore series", "Replicated onshore series",
                                  "Original offshore series", "Replicated offshore series"),
-                      values = c("grey", "light blue", " dark blue", "black")) +
+                      values = c("grey", "light blue", " dark blue", "dark green")) +
   ylab(label="Load in MWh") + 
   xlab("Hours") + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
