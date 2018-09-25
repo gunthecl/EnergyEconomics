@@ -1,5 +1,5 @@
 #function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
-                solver=solver)
+#                solver=solver)
 timeset = 1:24
     HOURS   = collect(timeset)
     SCEN    = sets["Scenarios"]

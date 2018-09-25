@@ -23,7 +23,12 @@ function load_data(folder::String)
     STOR = array(select(storages_table, :Technology))
     STOR = convert(Array, STOR)
 
-    HOURS = collect(1:24)
+    scenarios, HOURS = load_RData(
+        "test_scenario/stochastic/scenariotech30.rda",
+        "test_scenario/stochastic/weights30.csv")
+    SCENARIOS = collect(keys(scenarios))
+
+    #HOURS = collect(1:24)
 
     ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
     ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
@@ -56,10 +61,6 @@ function load_data(folder::String)
 
     resShare = NamedArray(select(policies_table, :resShare),
         (ZONES,), ("Zone",))
-
-    scenarios = load_RData("test_scenario/stochastic/scenariotech30.rda",
-        "test_scenario/stochastic/weights30.csv", HOURS, ZONES)
-    SCENARIOS = collect(keys(scenarios))
 
     # sets dictionary
     sets = Dict(

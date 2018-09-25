@@ -4,6 +4,7 @@
 #using Plots, StatPlots
 using NamedArrays
 using JuliaDB
+using DataStructures
 using RData
 using JuMP
 using Gurobi
