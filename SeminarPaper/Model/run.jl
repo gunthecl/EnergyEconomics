@@ -21,21 +21,26 @@ sets, param = load_data("input_data")
 
 results = invest(sets, param, 1:24, GurobiSolver())
 
-# quick Overview
+# quick overview
 for z in sets["Zones"]
-    print("\n\n\n------------------ $z ------------------\n\n\n")
     capacity = round.(Array(results[z]["Capacity"])./1000,1)
     capacity_type = names(results[z]["Capacity"])[1]
     display(barplot(capacity_type, capacity,
                     title=string(z, " installed capacity [MW]")))
-    gen_sum = sum(Array(results[z]["Generation"]))
-    stor_gen_sum = sum(Array(results[z]["Storage Generation"]))
-    stor_con_sum = sum(Array(results[z]["Storage Consumption"]))
-    ex_sum = sum(Array(results[z]["Exchange"]))
-    total_gen = gen_sum + stor_gen_sum - stor_con_sum + ex_sum
-    demand = sum(Array(param["Demand"][:, z]))
-    display(barplot(["Total Generation", "Demand"], [total_gen, demand]))
 end
+scen = "Scenario 1"
+label = sets["Tech"]
+#colors = [:red, :green, :yellow, :blue, :magenta,  :cyan]
+for (num, z) in enumerate(sets["Zones"])
+    generation = convert(Array, results[z][scen]["Generation"])
+    if num == 1
+        plot = lineplot(generation[:,num], title=z, name=label[num])
+    else
+        lineplot!(plot, generation[:,num], title=z, name=label[num])
+    end
+    display(plot)
+end
+
 
 # generation plot
 cap = zeros(1,5)
