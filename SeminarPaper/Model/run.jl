@@ -1,14 +1,13 @@
 # ------------------------------------------------------------------------------
 # load Julia packages
 # ------------------------------------------------------------------------------
-#using Plots, StatPlots
 using NamedArrays
 using JuliaDB
 using DataStructures
 using RData
 using JuMP
 using Gurobi
-using UnicodePlots
+using Plots, StatPlots, UnicodePlots
 
 # include functions
 include("load_data.jl")
@@ -67,9 +66,9 @@ function savg(named_array)
     avg = Array{Any}(8760,6)
     i = 1
     x = 1
-    while i < size(a)[1]
+    while i < size(named_array)[1]
         for j = collect(1:6)
-            avg[i,j] = (a[i,j]+a[i+1,j])/2
+            avg[i,j] = (named_array[i,j]+named_array[i+1,j])/2
         end
         arr[x,:] = avg[i,:]
         i = i+2
