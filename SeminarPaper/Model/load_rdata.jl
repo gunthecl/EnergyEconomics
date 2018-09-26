@@ -1,18 +1,15 @@
-function load_RData(file_scenario::String, file_weight::String)
+function load_RData(file_stochastic::String, file_weight::String,
+    file_deterministic::String)
     """
-        load_RData(scenarioFile, weightsFile)
-
-    Load scenario specific input data derived from an RData file.
-
-    Return dictionary with specific scenarios with underlying datasets and
-    number of scenario specific hours.
-
     Note: IB must be last indexing name for zones! Wind Offshore tables are
           appended by a 24x1 zeros array to include IB as a zone. (Make the
           investment model more accessible for indexing)
     """
+    # -------------------------------------------------------------------------
+    # stochastic data
+    # -------------------------------------------------------------------------
     # load RData file
-    rData = RData.load(file_scenario, convert=true)
+    rData = RData.load(file_stochastic, convert=true)
     rData = rData["scenario.tech"] # discard nesting level
     # load weights table
     weight_table = JuliaDB.loadtable(file_weight)
@@ -45,5 +42,21 @@ function load_RData(file_scenario::String, file_weight::String)
             ("Hours", "Zones"))
         scenarios[scen]["Weight"]       = weight[num]
     end
+
+    # -------------------------------------------------------------------------
+    # deterministic data
+    # -------------------------------------------------------------------------
+    rData = RData.load(file_deterministic, convert=true)
+    rData = rData["scenario.determ"] # discard nesting level
+    # respect unique order of rData
+    ZONES = Array{String}(6)
+    for (num, name) in enumerate(names(rData["1987pv"]))
+        name = string(name)
+        ZONES[num] = name
+    end
+
+
+
+
     return scenarios, HOURS
 end

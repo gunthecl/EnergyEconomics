@@ -37,16 +37,19 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
             for stor in STOR, zone in ZONES)
         + 0.5 * sum(param["AnnuityEnergy"][stor] * CAP_ST_E[zone, stor]
             for stor in STOR, zone in ZONES)
-        + sum(param["Scenario Data"][scen]["Weight"] *
+        + sum(param["Stochastic Data"][scen]["Weight"] *
             param["MarginalCost"][tech] * G[scen, hour, zone, tech]
             for scen in SCEN, hour in HOURS, tech in TECH, zone in ZONES)
+        + sum(param["Stochastic Data"][scen]["Weight"] *
+            param["Storage MarginalCost"][stor] * G_STOR[scen, hour, zone, stor]
+            for scen in SCEN, hour in HOURS, stor in STOR, zone in ZONES)
         );
     # constraints
     @constraint(Invest, EnergyBalance[scen=SCEN, hour=HOURS, zone=ZONES],
         sum(G[scen, hour, zone, tech] for tech in TECH)
         + sum(G_STOR[scen, hour, zone, stor] for stor in STOR)
         ==
-        param["Scenario Data"][scen]["Demand"][hour, zone]
+        param["Stochastic Data"][scen]["Demand"][hour, zone]
         - sum(EX[scen, hour, from_zone, zone] for from_zone in ZONES)
         + sum(EX[scen, hour, zone, to_zone] for to_zone in ZONES)
         + sum(D_STOR[scen, hour, zone, stor] for stor in STOR)
@@ -111,7 +114,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
             ResAvailability[i] = @constraint(Invest,
                 G[scen, hour, zone, ndisp]
                 <=
-                param["Scenario Data"][scen][ndisp][hour, zone] *
+                param["Stochastic Data"][scen][ndisp][hour, zone] *
                 CAP[zone, ndisp]
                 );
             i = i + 1
@@ -119,7 +122,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
             ResAvailability[i] = @constraint(Invest,
                 G[scen, hour, zone, ndisp]
                 <=
-                param["Scenario Data"][scen]["PV"][hour, zone] *
+                param["Stochastic Data"][scen]["PV"][hour, zone] *
                 CAP[zone, ndisp]
                 );
             i = i+1
@@ -138,7 +141,7 @@ function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         sum(G[scen, hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
         ==
         param["ResShare"][zone]/100 *
-        sum(param["Scenario Data"][scen]["Demand"][hour, zone]
+        sum(param["Stochastic Data"][scen]["Demand"][hour, zone]
             for hour in HOURS)
     );
     # call solver

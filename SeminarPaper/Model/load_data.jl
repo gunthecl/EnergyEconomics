@@ -51,10 +51,10 @@ function load_data(folder::String)
     annuity_oc_energy = NamedArray(storOCEnergy_array, (STOR,), ("Storages",))
 
     mc = NamedArray(select(tech_table, :MC), (TECHNOLOGY,), ("Technologies",))
+    mc_stor = NamedArray(select(storages_table, :MC), (STOR,), ("Storages",))
     etaTech = NamedArray(select(tech_table, :eta), (TECHNOLOGY,),
         ("Technologies",))
     etaStor = NamedArray(select(storages_table, :eta), (STOR,), ("Storages",))
-    #eta     = vcat(etaTech, etaStor)
     # carbon content for implemenation of maximum CO2 emission
     carbCon = NamedArray(select(tech_table, :CarbCon), (TECHNOLOGY,),
         ("Technologies",)) # in t/MWh
@@ -79,13 +79,14 @@ function load_data(folder::String)
         "Tech Efficiency"       => etaTech,
         "Storage Efficiency"    => etaStor,
         "MarginalCost"          => mc,
+        "Storage MarginalCost"  => mc_stor,
         "Annuity"               => annuity,
         "AnnuityPower"          => annuity_oc_power,
         "AnnuityEnergy"         => annuity_oc_energy,
         "ResShare"              => resShare,
         "RES Potentials"        => potentials,
         "Stor Potentials"       => potPumpStor,
-        "Scenario Data"         => scenarios
+        "Stochastic Data"       => scenarios
     )
     return sets, param
 end
