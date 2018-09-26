@@ -18,7 +18,7 @@ include("greenfield_determ.jl")
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
-sets, param = load_data("input_data")
+sets, param = load_data("input_data", true)
 
 results  = Dict()
 results["Stochastic"] = invest_stochastic(sets, param, 1:24, GurobiSolver())
@@ -53,26 +53,8 @@ groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
             ylabel = "installed capacity in MW", framestyle=:box)
 
 
-for year in names(param["Deterministic Data"])
-    for series in names(param["Deterministic Data"][year])
-        param["Deterministic Data"][year][series] = savg(param["Deterministic Data"][year][series])
-    end
-end
-
-function savg(named_array)
-    hour = collect(1:4380)
-    id   = names(named_array)[2]
-    arr = Array{Any}(4380,6)
-    avg = Array{Any}(8760,6)
-    i = 1
-    x = 1
-    while i < size(named_array)[1]
-        for j = collect(1:6)
-            avg[i,j] = (named_array[i,j]+named_array[i+1,j])/2
-        end
-        arr[x,:] = avg[i,:]
-        i = i+2
-        x = x+1
-    end
-    avg_array = NamedArray(arr, (hour, id), ("Hours", "Zones"))
-end
+# Convert to exportable dataframe format
+x = convert(Array, results["Deterministic"]["1987"]["UK"]["Capacity"])
+df = DataFrame(x)
+names!(df, [Symbol(t) for t in sets["Tech"]])
+CSV.write("test", df)

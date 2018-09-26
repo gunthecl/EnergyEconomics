@@ -1,4 +1,4 @@
-function load_data(folder::String)
+function load_data(folder::String, avg::Bool)
     # load files
     tech_table          = loadtable(string(folder, "/tech.csv"))
     storages_table      = loadtable(string(folder, "/storages.csv"))
@@ -29,8 +29,6 @@ function load_data(folder::String)
         "test_scenario/deterministic/scenarios_deterministic.rda")
     SCENARIOS = collect(keys(scenarios))
     YEARS     = collect(keys(weatherYears))
-
-    #HOURS = collect(1:24)
 
     ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
     ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
@@ -91,5 +89,35 @@ function load_data(folder::String)
         "Stochastic Data"       => scenarios,
         "Deterministic Data"    => weatherYears
     )
+
+    if avg == true
+        for year in names(param["Deterministic Data"])
+            for series in names(param["Deterministic Data"][year])
+                param["Deterministic Data"][year][series] = m_avg(
+                    param["Deterministic Data"][year][series])
+            end
+        end
+    end
+
     return sets, param
+end
+
+# helper functions
+function m_avg(named_array)
+    hour = collect(1:4380)
+    id   = names(named_array)[2]
+    arr = Array{Any}(4380,6)
+    avg = Array{Any}(8760,6)
+    i = 1
+    x = 1
+    while i < size(named_array)[1]
+        for j = collect(1:6)
+            avg[i, j] = (named_array[i, j] + named_array[i+1, j]) / 2
+        end
+        arr[x,:] = avg[i,:]
+        i = i+2
+        x = x+1
+    end
+    named_array = NamedArray(arr, (hour, id), ("Hours", "Zones"))
+    return named_array
 end
