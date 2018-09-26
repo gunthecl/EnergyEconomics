@@ -57,6 +57,7 @@ function load_RData(file_stochastic::String, file_weight::String,
     end
     HOURS = collect(1:size(rData["1987pv"])[1])
     # determine years
+    num_years = Int(length(unique(keys(rData)))/4)
     years = Array{String}(num_years)
     i = 1
     for key in unique(keys(rData))
