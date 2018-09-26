@@ -32,6 +32,10 @@ wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
 dat.res            <- read.csv(paste0(wd.path,"ninja_pv_wind_profiles_1985-2016_final.csv"), 
                                stringsAsFactors = FALSE)
 
+dat.load.2015      <- read.csv(paste0(wd.path,"time_series_load_2015_final.csv"), 
+                               stringsAsFactors = FALSE)
+
+
 # Source needed functions
 setwd(wd.path)
 
@@ -56,6 +60,15 @@ dat.res$IB_wind_onshore_current  <-  (dat.res$ES_wind_national_current*0.845
 dat.res$LU_wind_offshore_current <- (dat.res$BE_wind_offshore_current*0.441 
                                       + dat.res$NL_wind_offshore_current*0.559)
 
+
+# Sum load for Spain & Portugal, Luxembourg & Netherlands & Belgium
+dat.load.2015$LU_load_entsoe_power_statistics <-  ( dat.load.2015$BE_load_entsoe_power_statistics
+                                                    + dat.load.2015$LU_load_entsoe_power_statistics
+                                                    + dat.load.2015$NL_load_entsoe_power_statistics)
+
+dat.load.2015$IB_load_entsoe_power_statistics <-  ( dat.load.2015$ES_load_entsoe_power_statistics
+                                                    + dat.load.2015$PT_load_entsoe_power_statistics)
+
 # Select columns 
 var.vec     <- c("LU_pv_national_current", "LU_wind_onshore_current", "LU_wind_offshore_current",
                  "DE_pv_national_current", "DE_wind_onshore_current", "DE_wind_offshore_current",
@@ -65,6 +78,16 @@ var.vec     <- c("LU_pv_national_current", "LU_wind_onshore_current", "LU_wind_o
                  "IB_pv_national_current", "IB_wind_onshore_current")
 
 dat.original <- dat.res[,var.vec]
+
+var.vec.load <- c("LU_load_entsoe_power_statistics",
+                  "DE_load_entsoe_power_statistics", 
+                  "DK_load_entsoe_power_statistics",
+                  "FR_load_entsoe_power_statistics",
+                  "GB_load_entsoe_power_statistics",
+                  "IB_load_entsoe_power_statistics")
+
+dat.load     <- dat.load.2015[,var.vec.load]
+
 
 # Drop leap year days
 leap.hours      <- c((59*24+1):(59*24+24))
@@ -167,6 +190,12 @@ for (i in (c(1987, 1998, 2003,2010,2015))){
     colnames(scenario.determ[[paste0(i, "off")]]) <- country[1:5]
     rownames(scenario.determ[[paste0(i, "off")]]) <- 1:8760
     scenario.determ[[paste0(i, "off")]] <- data.frame(scenario.determ[[paste0(i, "off")]])
+    
+    # Save load vector
+    scenario.determ[[paste0(i, "load")]] <- dat.load
+    colnames(scenario.determ[[paste0(i, "load")]]) <- country
+    rownames(scenario.determ[[paste0(i, "load")]]) <- 1:8760
+    scenario.determ[[paste0(i, "load")]] <- data.frame(scenario.determ[[paste0(i, "load")]])
     
     
 }
