@@ -52,3 +52,12 @@ end
 cap = cap[setdiff(1:end, 1), :]
 groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
             ylabel = "installed capacity in MW", framestyle=:box)
+
+
+b = []
+i = 1
+while i < size(a)[1]-1
+    avg = (a[i]+a[i+1])/2
+    append!(b, avg)
+    i = i+2
+end
