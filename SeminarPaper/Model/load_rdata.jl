@@ -2,7 +2,7 @@ function load_RData(file_stochastic::String, file_weight::String,
     file_deterministic::String)
     """
     Note: IB must be last indexing name for zones! Wind Offshore tables are
-          appended by a 24x1 zeros array to include IB as a zone. (Make the
+          appended by a fitting zeros array to include IB as a zone. (Make the
           investment model more accessible for indexing)
     """
     # -------------------------------------------------------------------------
@@ -37,7 +37,8 @@ function load_RData(file_stochastic::String, file_weight::String,
         scenarios[scen]["WindOnshore"]  = NamedArray(on_array, (HOURS, ZONES),
             ("Hours", "Zones"))
         scenarios[scen]["WindOffshore"] = NamedArray(
-            hcat(off_array, zeros(24,1)), (HOURS, ZONES), ("Hours", "Zones"))
+            hcat(off_array, zeros(length(HOURS),1)), (HOURS, ZONES),
+            ("Hours", "Zones"))
         scenarios[scen]["Demand"]       = NamedArray(load_array, (HOURS, ZONES),
             ("Hours", "Zones"))
         scenarios[scen]["Weight"]       = weight[num]
@@ -54,9 +55,37 @@ function load_RData(file_stochastic::String, file_weight::String,
         name = string(name)
         ZONES[num] = name
     end
+    HOURS = collect(1:size(rData["1987pv"])[1])
+    # determine years
+    years = Array{String}(num_years)
+    i = 1
+    for key in unique(keys(rData))
+        if contains(key, "load")
+            years[i] = split(key, "l")[1]
+            i = i+1
+        end
+    end
+    sort!(years)
+    weatherYears = OrderedDict()
+    for num in collect(1:length(years))
+        year = years[num]
+        weatherYears[year] = OrderedDict()
+        # select data
+        pv_array    = Array(rData[string(year,"pv")])
+        on_array    = Array(rData[string(year,"on")])
+        off_array   = Array(rData[string(year,"off")])
+        load_array  = Array(rData[string(year,"load")])
+        # fill in NamedArrays
+        weatherYears[year]["PV"]           = NamedArray(pv_array, (HOURS, ZONES),
+            ("Hours", "Zones"))
+        weatherYears[year]["WindOnshore"]  = NamedArray(on_array, (HOURS, ZONES),
+            ("Hours", "Zones"))
+        weatherYears[year]["WindOffshore"] = NamedArray(
+            hcat(off_array, zeros(length(HOURS),1)), (HOURS, ZONES),
+            ("Hours", "Zones"))
+        weatherYears[year]["Demand"]       = NamedArray(load_array, (HOURS, ZONES),
+            ("Hours", "Zones"))
+    end
 
-
-
-
-    return scenarios, HOURS
+    return scenarios, weatherYears
 end

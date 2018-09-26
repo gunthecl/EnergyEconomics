@@ -23,10 +23,12 @@ function load_data(folder::String)
     STOR = array(select(storages_table, :Technology))
     STOR = convert(Array, STOR)
 
-    scenarios, HOURS = load_RData(
+    scenarios, weatherYears = load_RData(
         "test_scenario/stochastic/scenariotech30.rda",
-        "test_scenario/stochastic/weights30.csv")
+        "test_scenario/stochastic/weights30.csv",
+        "test_scenario/deterministic/scenarios_deterministic.rda")
     SCENARIOS = collect(keys(scenarios))
+    YEARS     = collect(keys(weatherYears))
 
     #HOURS = collect(1:24)
 
@@ -64,13 +66,13 @@ function load_data(folder::String)
 
     # sets dictionary
     sets = Dict(
-        "Hours"     => HOURS,
         "Zones"     => ZONES,
         "Tech"      => TECHNOLOGY,
         "Disp"      => DISP,
         "Nondisp"   => NONDISP,
         "Storage"   => STOR,
-        "Scenarios" => SCENARIOS
+        "Scenarios" => SCENARIOS,
+        "Years"     => YEARS
     )
 
     # parameters dictionary
@@ -86,7 +88,8 @@ function load_data(folder::String)
         "ResShare"              => resShare,
         "RES Potentials"        => potentials,
         "Stor Potentials"       => potPumpStor,
-        "Stochastic Data"       => scenarios
+        "Stochastic Data"       => scenarios,
+        "Deterministic Data"    => weatherYears
     )
     return sets, param
 end

@@ -1,5 +1,5 @@
-function invest(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
-                solver=solver)
+function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
+    solver=solver)
 
     HOURS   = collect(timeset)
     SCEN    = sets["Scenarios"]

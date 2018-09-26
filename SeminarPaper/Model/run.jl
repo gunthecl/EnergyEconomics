@@ -13,25 +13,32 @@ using UnicodePlots
 # include functions
 include("load_data.jl")
 include("load_rdata.jl")
-include("greenfield.jl")
+include("greenfield_stoch.jl")
+include("greenfield_determ.jl")
 
 # ------------------------------------------------------------------------------
 # load input data
 # ------------------------------------------------------------------------------
 sets, param = load_data("input_data")
 
-results = invest(sets, param, 1:24, GurobiSolver())
+results  = Dict()
+results["Stochastic"] = invest_stochastic(sets, param, 1:24, GurobiSolver())
+for year in sets["Years"]
+    results["Deterministic"] = Dict()
+    results["Deterministic"][year] = invest_deterministic(sets, param,
+        year, 1:8760, GurobiSolver())
+end
 
+s = "Stochastic"
 # quick overview
 for z in sets["Zones"]
-    capacity = round.(Array(results[z]["Capacity"])./1000,1)
-    capacity_type = names(results[z]["Capacity"])[1]
-    storage_type = names(results[z]["Storage Power"])[1]
-    storage = round.(Array(results[z]["Storage Power"])./1000,1)
+    capacity = round.(Array(results[s][z]["Capacity"])./1000,1)
+    capacity_type = names(results[s][z]["Capacity"])[1]
+    storage_type = names(results[s][z]["Storage Power"])[1]
+    storage = round.(Array(results[s][z]["Storage Power"])./1000,1)
     label = vcat(capacity_type, storage_type)
     data = vcat(capacity, storage)
-    display(barplot(label, data,
-                    title=string(z, " installed capacity [MW]")))
+    display(barplot(label, data, title=string(z, " installed capacity [MW]")))
 end
 
 # generation plot
