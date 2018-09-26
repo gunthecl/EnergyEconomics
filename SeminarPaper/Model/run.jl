@@ -26,7 +26,7 @@ results["Stochastic"] = invest_stochastic(sets, param, 1:24, GurobiSolver())
 for year in sets["Years"]
     results["Deterministic"] = Dict()
     results["Deterministic"][year] = invest_deterministic(sets, param,
-        year, 1:8760, GurobiSolver())
+        year, 1:4380, GurobiSolver())
 end
 
 s = "Stochastic"
@@ -54,10 +54,26 @@ groupedbar(name, cap/1e3, group = ctg, bar_position=:stack, lw=0,
             ylabel = "installed capacity in MW", framestyle=:box)
 
 
-b = []
-i = 1
-while i < size(a)[1]-1
-    avg = (a[i]+a[i+1])/2
-    append!(b, avg)
-    i = i+2
+for year in names(param["Deterministic Data"])
+    for series in names(param["Deterministic Data"][year])
+        param["Deterministic Data"][year][series] = savg(param["Deterministic Data"][year][series])
+    end
+end
+
+function savg(named_array)
+    hour = collect(1:4380)
+    id   = names(named_array)[2]
+    arr = Array{Any}(4380,6)
+    avg = Array{Any}(8760,6)
+    i = 1
+    x = 1
+    while i < size(a)[1]
+        for j = collect(1:6)
+            avg[i,j] = (a[i,j]+a[i+1,j])/2
+        end
+        arr[x,:] = avg[i,:]
+        i = i+2
+        x = x+1
+    end
+    avg_array = NamedArray(arr, (hour, id), ("Hours", "Zones"))
 end
