@@ -113,10 +113,7 @@ function m_avg(named_array)
     i = 1
     x = 1
     while i < size(named_array)[1]
-        for j = collect(1:6)
-            avg[i, j] = (named_array[i, j] + named_array[i+1, j]) / 2
-        end
-        arr[x,:] = avg[i,:]
+        arr[x,:] = named_array[i,:]
         i = i+2
         x = x+1
     end

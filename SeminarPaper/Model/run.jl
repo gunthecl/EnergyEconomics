@@ -26,15 +26,16 @@ folder      = "input_data"      # input data folder
 resShare    = 80                # RES share in %
 bisect      = true              # true = take every second hour
 h_stoch     = 1:24              # number of timesteps in stochastic model
-h_det       = 1:8760            # numer of timesteps in deterministic model
+h_det       = 1:4380            # numer of timesteps in deterministic model
 
 sets, param = load_data(folder, bisect, resShare)
 
 # TODO: 2015 whole time series, all 5 years every second hour
 results  = Dict()
 results["Stochastic"] = invest_stochastic(sets, param, h_stoch, GurobiSolver())
+results["Deterministic"] = Dict()
 for year in sets["Years"]
-    results["Deterministic"] = Dict()
+    results["Deterministic"][year] = Dict()
     results["Deterministic"][year] = invest_deterministic(sets, param,
         year, h_det, GurobiSolver())
 end
