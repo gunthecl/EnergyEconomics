@@ -13,7 +13,7 @@ function load_RData(file_stochastic::String, file_weight::String,
     rData = rData["scenario.tech"] # discard nesting level
     # load weights table
     weight_table = JuliaDB.loadtable(file_weight)
-    weight = select(weight_table, (:weight))
+    weight = select(weight_table, (:weight)) * 365 # fix costs distortet
     # respect unique order of rData
     ZONES = Array{String}(6)
     for (num, name) in enumerate(names(rData["1pv"]))

@@ -1,6 +1,6 @@
 function invest_deterministic(sets::Dict, param::Dict, year::String,
     timeset::UnitRange=1:8760, solver=solver)
-    
+
     HOURS   = collect(timeset)
     TECH    = sets["Tech"]
     DISP    = sets["Disp"]
@@ -131,12 +131,18 @@ function invest_deterministic(sets::Dict, param::Dict, year::String,
         CAP_ST_P[zone, stor] <= param["Stor Potentials"][zone]
         );
 
-    @constraint(Invest, ResQuota[zone=ZONES],
-        sum(G[hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
+    @constraint(Invest, ResQuota,
+        sum(G[hour, zone, ndisp] for hour in HOURS, zone in ZONES,
+            ndisp in NONDISP)
         ==
-        param["ResShare"][zone]/100 *
+        param["ResShare"]/100 *
         sum(param["Deterministic Data"][year]["Demand"][hour, zone]
-            for hour in HOURS)
+            for hour in HOURS, zone in ZONES)
+        - sum(EX[hour, from_zone, zone] for hour in HOURS, zone in ZONES,
+            from_zone in ZONES)
+        + sum(EX[hour, zone, to_zone] for hour in HOURS, zone in ZONES,
+            to_zone in ZONES)
+
     );
     # call solver
     status = solve(Invest)

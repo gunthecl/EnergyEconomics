@@ -1,4 +1,4 @@
-function load_data(folder::String, avg::Bool)
+function load_data(folder::String, avg::Bool, RES_percent::Int)
     # load files
     tech_table          = loadtable(string(folder, "/tech.csv"))
     storages_table      = loadtable(string(folder, "/storages.csv"))
@@ -59,8 +59,9 @@ function load_data(folder::String, avg::Bool)
     carbCon = NamedArray(select(tech_table, :CarbCon), (TECHNOLOGY,),
         ("Technologies",)) # in t/MWh
 
-    resShare = NamedArray(select(policies_table, :resShare),
-        (ZONES,), ("Zone",))
+    resShare = RES_percent
+    #resShare = NamedArray(select(policies_table, :resShare),
+    #    (ZONES,), ("Zone",))
 
     # sets dictionary
     sets = Dict(
@@ -103,6 +104,7 @@ function load_data(folder::String, avg::Bool)
 end
 
 # helper functions
+# TODO: Every second hour, not smoothing average
 function m_avg(named_array)
     hour = collect(1:4380)
     id   = names(named_array)[2]

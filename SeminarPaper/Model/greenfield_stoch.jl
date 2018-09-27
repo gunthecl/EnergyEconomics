@@ -137,12 +137,17 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         CAP_ST_P[zone, stor] <= param["Stor Potentials"][zone]
         );
 
-    @constraint(Invest, ResQuota[scen=SCEN, zone=ZONES],
-        sum(G[scen, hour, zone, ndisp] for hour in HOURS, ndisp in NONDISP)
+    @constraint(Invest, ResQuota[scen=SCEN],
+        sum(G[scen, hour, zone, ndisp] for hour in HOURS, zone in ZONES,
+            ndisp in NONDISP)
         ==
-        param["ResShare"][zone]/100 *
+        param["ResShare"]/100 *
         sum(param["Stochastic Data"][scen]["Demand"][hour, zone]
-            for hour in HOURS)
+            for hour in HOURS, zone in ZONES)
+        - sum(EX[scen, hour, from_zone, zone] for hour in HOURS, zone in ZONES,
+            from_zone in ZONES)
+        + sum(EX[scen, hour, zone, to_zone] for hour in HOURS, zone in ZONES,
+            to_zone in ZONES)
     );
     # call solver
     status = solve(Invest)
@@ -181,9 +186,12 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         for scen in SCEN
             results[zone][scen] = Dict()
             results[zone][scen]["Generation"] = generation[scen, :, zone, :]
-            results[zone][scen]["Storage Generation"] = storage_gen[scen, :, zone, :]
-            results[zone][scen]["Storage Consumption"] = storage_con[scen, :, zone, :]
-            results[zone][scen]["Storage Level"] = storage_lvl[scen, :, zone, :]
+            results[zone][scen]["Storage Generation"] = storage_gen[scen, :,
+                zone, :]
+            results[zone][scen]["Storage Consumption"] = storage_con[scen, :,
+                zone, :]
+            results[zone][scen]["Storage Level"] = storage_lvl[scen, :,
+                zone, :]
             results[zone][scen]["Curtailment"] = curtailment[scen, :, zone, :]
             results[zone][scen]["Exchange"] = exchange[scen, :, :, zone]
             results[zone][scen]["Price"] = price[scen, :, zone]
