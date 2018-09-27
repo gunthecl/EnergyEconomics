@@ -553,23 +553,42 @@ save(dat.2015.medoid.scaled, file = "2015_replicated.rda")
 # Export
 ## Store each scenario separately 
 scenarios <- list()
+# for (i in 1:nrow(medoid.vec)){
+#     
+#     data.raw       <- list()
+#     steps          <- ncol(medoid.vec)/24
+#     
+#     for (j in 1:steps){
+#         
+#     hours.day    <- {j*24-23}:{j*24}  
+#     new.variable <- t(medoid.vec[i,hours.day]) 
+#     
+#     colnames(new.variable) <- colnames(medoid.vec[i,hours.day])[1]
+#     data.raw[[j]] <- (new.variable)
+#     }
+#     
+#     scenarios[[i]] <- list.cbind(data.raw)
+#     
+# }
+
 for (i in 1:nrow(medoid.vec)){
+  
+  data.raw       <- list()
+  steps          <- ncol(medoid.vec)/24/7
+  
+  for (j in 1:steps){
     
-    data.raw       <- list()
-    steps          <- ncol(medoid.vec)/24
+    hours.week    <- {j*24*7-167}:{j*24*7}  
+    new.variable <- t(medoid.vec[i,hours.week]) 
     
-    for (j in 1:steps){
-        
-    hours.day    <- {j*24-23}:{j*24}  
-    new.variable <- t(medoid.vec[i,hours.day]) 
-    
-    colnames(new.variable) <- colnames(medoid.vec[i,hours.day])[1]
+    colnames(new.variable) <- colnames(medoid.vec[i,hours.week])[1]
     data.raw[[j]] <- (new.variable)
-    }
-    
-    scenarios[[i]] <- list.cbind(data.raw)
-    
+  }
+  
+  scenarios[[i]] <- list.cbind(data.raw)
+  
 }
+
 
 
 ## Split each technology separately 
@@ -582,29 +601,35 @@ load     <- 18:23
 
 country <- c("LU", "DE", "DK", "FR", "UK", "IB")
 
+# Weekly data
+vec.hour <- 1:168
+# Daly data
+#vec.hour <- 1:24
+
+
 for (i in 1:30){
 
    # Save pv vector
-   scenario.tech[[paste0(i, "pv")]]           <- scenarios[[i]][1:24,pv]
+   scenario.tech[[paste0(i, "pv")]]           <- scenarios[[i]][vec.hour,pv]
    colnames(scenario.tech[[paste0(i, "pv")]]) <- country
-   rownames(scenario.tech[[paste0(i, "pv")]]) <- 1:24
+   rownames(scenario.tech[[paste0(i, "pv")]]) <- vec.hour
    scenario.tech[[paste0(i, "pv")]]           <- data.frame(scenario.tech[[paste0(i, "pv")]])
    
    # Save onshore vector
-   scenario.tech[[paste0(i, "on")]] <- scenarios[[i]][1:24,onshore]
+   scenario.tech[[paste0(i, "on")]] <- scenarios[[i]][ vec.hour,onshore]
    colnames(scenario.tech[[paste0(i, "on")]]) <- country
-   rownames(scenario.tech[[paste0(i, "on")]]) <- 1:24
+   rownames(scenario.tech[[paste0(i, "on")]]) <- vec.hour
    scenario.tech[[paste0(i, "on")]]    <- data.frame(scenario.tech[[paste0(i, "on")]])
    
    # Save offshore vector
-   scenario.tech[[paste0(i, "off")]] <- scenarios[[i]][1:24,offshore]
+   scenario.tech[[paste0(i, "off")]] <- scenarios[[i]][ vec.hour,offshore]
    colnames(scenario.tech[[paste0(i, "off")]]) <- country[1:5]
-   rownames(scenario.tech[[paste0(i, "off")]]) <- 1:24
+   rownames(scenario.tech[[paste0(i, "off")]]) <- vec.hour
    scenario.tech[[paste0(i, "off")]] <- data.frame(scenario.tech[[paste0(i, "off")]])
    # Save load vector
-   scenario.tech[[paste0(i, "load")]] <- scenarios[[i]][1:24,load]
+   scenario.tech[[paste0(i, "load")]] <- scenarios[[i]][ vec.hour,load]
    colnames(scenario.tech[[paste0(i, "load")]]) <- country
-   rownames(scenario.tech[[paste0(i, "load")]]) <- 1:24
+   rownames(scenario.tech[[paste0(i, "load")]]) <-  vec.hour
    scenario.tech[[paste0(i, "load")]] <- data.frame(scenario.tech[[paste0(i, "load")]])
    
     
@@ -633,7 +658,7 @@ write.csv(x = scenario.tech, file = "tech_week.csv")
 weights <- cluster.size/sum(cluster.size)
 
 # Sanity check
-sum(cluster.size) == nrow(dat.original)/24
+sum(cluster.size) == nrow(dat.original)/24/7
 
 save(weights, file = "weights30_week.rda")
 write.csv(x = weights, file = "weights30_week.csv")
