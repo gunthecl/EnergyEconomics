@@ -25,8 +25,8 @@ include("greenfield_determ.jl")
 folder      = "input_data"      # input data folder
 resShare    = 80                # RES share in %
 bisect      = true              # true = take every second hour
-h_stoch     = 1:24              # number of timesteps in stochastic model
-h_det       = 1:4380            # numer of timesteps in deterministic model
+hSto        = 1:24              # number of timesteps in stochastic model
+hDet        = 1:4380            # numer of timesteps in deterministic model
 
 sets, param = load_data(folder, bisect, resShare)
 
@@ -35,12 +35,17 @@ results  = Dict()
 results["Stochastic"] = invest_stochastic(sets, param, h_stoch, GurobiSolver())
 results["Deterministic"] = Dict()
 for year in sets["Years"]
-    results["Deterministic"][year] = Dict()
-    results["Deterministic"][year] = invest_deterministic(sets, param,
-        year, h_det, GurobiSolver())
+    if year == "2016"
+
+    else
+        results["Deterministic"][year] = invest_deterministic(sets, param,
+            year, h_det, GurobiSolver())
+    end
 end
 
-save_data(results, resShare, Dates.now())
+hours_det = string(length(hDet))
+hours_sto = string(length(hSto))
+save_data(results, resShare, Dates.now(), hours_det, hours_sto)
 
 s = "Deterministic"
 # quick overview

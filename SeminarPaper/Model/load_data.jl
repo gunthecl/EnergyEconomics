@@ -24,8 +24,8 @@ function load_data(folder::String, avg::Bool, RES_percent::Int)
     STOR = convert(Array, STOR)
 
     scenarios, weatherYears = load_RData(
-        "test_scenario/stochastic/scenariotech30.rda",
-        "test_scenario/stochastic/weights30.csv",
+        "test_scenario/stochastic/scenariotech30_week.rda",
+        "test_scenario/stochastic/weights30_week.csv",
         "test_scenario/deterministic/scenarios_deterministic.rda")
     SCENARIOS = collect(keys(scenarios))
     YEARS     = collect(keys(weatherYears))
