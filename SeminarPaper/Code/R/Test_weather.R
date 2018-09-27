@@ -26,7 +26,7 @@ lapply(neededPackages, function(x) suppressPackageStartupMessages(
 ################################################################################
 
 ## Change path to working directory
-wd.path = "/Users/Lenovo/documents/Github/EnergyEconomics/SeminarPaper/Code/R/"
+wd.path = "X:/guec/other/EnergyEconomics/SeminarPaper/Code/R/"
 
 
 # Read in wind and pv data set
@@ -139,17 +139,49 @@ dat.new      <- list()
 dat.unscaled <- dat.original
 
 # Drop observations to deal with full weaks
-#no.drop      <- nrow(dat.original)-floor(nrow(dat.original)/7/24)*7*24
-#dat          <- dat[-c((nrow(dat)-no.drop+1):nrow(dat)),]
-#dat.unscaled <- dat.original[-c((nrow(dat.original)-no.drop+1):nrow(dat.original)),]
+no.drop      <- nrow(dat.original)-floor(nrow(dat.original)/7/24)*7*24
+dat          <- dat[-c((nrow(dat)-no.drop+1):nrow(dat)),]
+dat.unscaled <- dat.original[-c((nrow(dat.original)-no.drop+1):nrow(dat.original)),]
+dat.original <- dat.unscaled
 
 # Extend data set to wide format (each hour as variable)
-for (i in 1:(nrow(dat)/(24))){
+# for (i in 1:(nrow(dat)/(24))){
+#   
+#   j       <- i*24 - 23
+#   
+#   dat.day   <- dat[j:(j+23),]
+#   data_long <- melt(dat.day)
+#   data_wide <- t(data_long$value)
+#   colnames(data_wide) <- data_long$variable
+#   
+#   dat.new[[i]] <- data_wide
+#   
+# }
+# 
+# 
+# dat <- data.frame(list.rbind(dat.new))
+# 
+# # Repeat for unscaled data
+# for (i in 1:(nrow(dat.unscaled)/(24))){
+#   
+#   j       <- i*24 - 23
+#   
+#   dat.day   <- dat.unscaled[j:(j+23),]
+#   data_long <- melt(dat.day)
+#   data_wide <- t(data_long$value)
+#   colnames(data_wide) <- data_long$variable
+#   
+#   dat.new[[i]] <- data_wide
+#   
+# }
+
+# Extend data set to wide format (each hour of a week as variable)
+for (i in 1:(nrow(dat)/(24*7))){
   
-  j       <- i*24 - 23
+  j       <- i*24*7 - (24*7-1)
   
-  dat.day   <- dat[j:(j+23),]
-  data_long <- melt(dat.day)
+  dat.week  <- dat[j:(j+167),]
+  data_long <- melt(dat.week)
   data_wide <- t(data_long$value)
   colnames(data_wide) <- data_long$variable
   
@@ -161,18 +193,19 @@ for (i in 1:(nrow(dat)/(24))){
 dat <- data.frame(list.rbind(dat.new))
 
 # Repeat for unscaled data
-for (i in 1:(nrow(dat.unscaled)/(24))){
+for (i in 1:(nrow(dat.unscaled)/(24*7))){
   
-  j       <- i*24 - 23
+  j       <- i*24*7 - (24*7-1)
   
-  dat.day   <- dat.unscaled[j:(j+23),]
-  data_long <- melt(dat.day)
+  dat.week  <- dat.unscaled[j:(j+167),]
+  data_long <- melt(dat.week)
   data_wide <- t(data_long$value)
   colnames(data_wide) <- data_long$variable
   
   dat.new[[i]] <- data_wide
   
 }
+
 
 
 dat.unscaled <- data.frame(list.rbind(dat.new))
@@ -366,59 +399,89 @@ ggplot(GER.wind.both, aes(x = hour)) +
           panel.background = element_blank(),
           legend.key=element_blank())
 
+length(GER.wind_off.org) == length(GER.wind_off.repl)
 
 rm(GER.wind.both, GER.wind_on.org, GER.wind_on.repl,
    col.wind_on.GER, col.wind_on.GER.org,
   GER.wind_off.org, GER.wind_off.repl,
    col.wind_off.GER, col.wind_off.GER.org)
 
-
-length(GER.wind_off.org) == length(GER.wind_off.repl)
-
 ################################################################################
-# Reproduce 2014 weather year with cluster medoids
+# Reproduce 2015 weather year with cluster medoids
 
-days.2014       <- {(365*30)+1}:{365*31}
-hours.2014      <- {(365*30*24)+1}:{365*31*24}
-cluster.2014    <- clusters[days.2014]
+# # Daily Basis
+# days.2015       <- {(365*30)+1}:{365*31}
+# hours.2015      <- {(365*30*24)+1}:{365*31*24}
+# cluster.2015    <- clusters[days.2015]
+# 
+# dat.2015.medoid.raw  <- medoid.vec[cluster.2015,]
+# dat.2015.medoid.list <- list()
+# # Merge hours back into one vector
+# for (i in 1:23){
+#   
+#     vec.hours <- {i*24-23}:{i*24}
+#     col.vec   <-  dat.2015.medoid.raw[,vec.hours]
+#     day       <- list()
+#     
+#     for (j in 1:nrow(col.vec)){
+#       
+#       day[[j]] <- as.numeric(col.vec[j,])
+#       
+#       
+#     }
+#     
+#     dat.2015.medoid.list[[i]] <- unlist(t(day))
+#   
+#   
+# }
 
-dat.2014.medoid.raw  <- medoid.vec[cluster.2014,]
-dat.2014.medoid.list <- list()
+# Weekly Basis
+weeks.2015      <- {1564}:{1564+51}
+hours.2015      <- {(365*30*24)+1}:{365*31*24}
+cluster.2015    <- clusters[weeks.2015]
+
+dat.2015.medoid.raw  <- medoid.vec[cluster.2015,]
+dat.2015.medoid.list <- list()
+
 # Merge hours back into one vector
 for (i in 1:23){
   
-    vec.hours <- {i*24-23}:{i*24}
-    col.vec   <-  dat.2014.medoid.raw[,vec.hours]
-    day       <- list()
+  vec.hours <- {i*168-167}:{i*168}
+  col.vec   <-  dat.2015.medoid.raw[,vec.hours]
+  week       <- list()
+  
+  for (j in 1:nrow(col.vec)){
     
-    for (j in 1:nrow(col.vec)){
-      
-      day[[j]] <- as.numeric(col.vec[j,])
-      
-      
-    }
+    week[[j]] <- as.numeric(col.vec[j,])
     
-    dat.2014.medoid.list[[i]] <- unlist(t(day))
+    
+  }
+  
+  dat.2015.medoid.list[[i]] <- unlist(t(week))
   
   
 }
 
-# Finish replicated and original 2014 data set
-dat.2014.medoid           <- data.frame(t(list.rbind(dat.2014.medoid.list)))
-colnames(dat.2014.medoid) <- colnames(dat.original)
-dat.2014.org              <- dat.original[hours.2014,]
+
+# Finish replicated and original 2015 data set
+dat.2015.medoid           <- data.frame(t(list.rbind(dat.2015.medoid.list)))
+colnames(dat.2015.medoid) <- colnames(dat.original)
+dat.2015.org              <- dat.original[hours.2015,]
+
+# Duplicated last day of the year
+dat.2015.medoid <- rbind(dat.2015.medoid, dat.2015.medoid[8713:8736,])
 
 # Rescale replicated data set
-mean.org   = apply(dat.2014.org, 2, mean)
-mean.clust = apply(dat.2014.medoid, 2, mean)
+mean.org   = apply(dat.2015.org, 2, mean)
+mean.clust = apply(dat.2015.medoid, 2, mean)
 gamma      = (mean.clust-mean.org)
-dat.2014.medoid.scaled = as.data.frame(scale(dat.2014.medoid, center = gamma, scale = FALSE))
+dat.2015.medoid.scaled = as.data.frame(scale(dat.2015.medoid, center = gamma, scale = FALSE))
 
-rm(dat.2014.medoid.raw, dat.2014.medoid.list)
+rm(dat.2015.medoid.raw, dat.2015.medoid.list)
 
 # Compare both data sets
-dat.compare  <- cbind(dat.2014.medoid.scaled, dat.2014.org)
-vec.names    <- colnames(dat.2014.org)
+dat.compare  <- cbind(dat.2015.medoid.scaled, dat.2015.org)
+vec.names    <- colnames(dat.2015.org)
 colnames(dat.compare) <- c(paste0(vec.names, ".rep"), paste0(vec.names, ".org"))
 dat.compare$hour  <- 1:8760
 
@@ -481,9 +544,13 @@ ggplot(dat.compare, aes(x = hour)) +
               panel.background = element_blank(),
               legend.key=element_blank())
 
+
+
+# Store 2015 replicated data
+save(dat.2015.medoid.scaled, file = "2015_replicated.rda")
+
 ################################################################################
 # Export
-
 ## Store each scenario separately 
 scenarios <- list()
 for (i in 1:nrow(medoid.vec)){
@@ -556,10 +623,10 @@ for (i in 1:30){
 z <- list.rbind(mean.vecs)
 
 #save(medoid.vec, file = "scenario30.rda")
-save(scenarios, file = "scenarios30.rda")
-save(scenario.tech, file = "scenariotech30.rda")
+save(scenarios, file = "scenarios30_week.rda")
+save(scenario.tech, file = "scenariotech30_week.rda")
 write.csv(x = medoid.vec, file = "test.csv")
-write.csv(x = scenario.tech, file = "tech.csv")
+write.csv(x = scenario.tech, file = "tech_week.csv")
 
 
 # Save weights fpr scenarios
@@ -568,13 +635,13 @@ weights <- cluster.size/sum(cluster.size)
 # Sanity check
 sum(cluster.size) == nrow(dat.original)/24
 
-save(weights, file = "weights30.rda")
-write.csv(x = weights, file = "weights30.csv")
+save(weights, file = "weights30_week.rda")
+write.csv(x = weights, file = "weights30_week.csv")
 
 labels.country <- country
 tech <- c("pv", "onshore", "offshore", "load")
 labels.tech    <- cbind((rep(1:30, each = 4)), tech)
 
-write.csv(x = labels.tech, file = "labelscen.csv")
-write.csv(x = country, file = "labelcountry.csv")
+write.csv(x = labels.tech, file = "labelscen_week.csv")
+write.csv(x = country, file = "labelcountry_week.csv")
 

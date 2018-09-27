@@ -36,6 +36,8 @@ dat.load.2015      <- read.csv(paste0(wd.path,"time_series_load_2015_final.csv")
                                stringsAsFactors = FALSE)
 
 
+dat.2015.repl      <- load("2015_replicated.rda")
+
 # Source needed functions
 setwd(wd.path)
 
@@ -199,6 +201,32 @@ for (i in (c(1987, 1998, 2003,2010,2015))){
     
     
 }
+
+# Save replicated from 2015 Data
+
+# Save pv vector
+scenario.determ[["2016pv"]]           <- dat.2015.medoid.scaled[,pv]
+colnames(scenario.determ[["2016pv"]])<- country
+rownames(scenario.determ[["2016pv"]]) <- 1:8760
+scenario.determ[["2016pv"]]           <- data.frame(scenario.determ[["2016pv"]])
+
+# Save onshore vector
+scenario.determ[["2016on"]]           <- dat.2015.medoid.scaled[,onshore]
+colnames(scenario.determ[["2016on"]]) <- country
+rownames(scenario.determ[["2016on"]]) <- 1:8760
+scenario.determ[["2016on"]]    <- data.frame(scenario.determ[["2016on"]])
+
+# Save offshore vector
+scenario.determ[["2016off"]] <- dat.2015.medoid.scaled[,offshore]
+colnames(scenario.determ[["2016off"]]) <- country[1:5]
+rownames(scenario.determ[["2016off"]]) <- 1:8760
+scenario.determ[["2016off"]] <- data.frame(scenario.determ[["2016off"]])
+
+
+scenario.determ[["2016load"]]           <- dat.2015.medoid.scaled[,18:23]
+colnames(scenario.determ[["2016load"]])  <- country
+rownames(scenario.determ[["2016load"]])  <- 1:8760
+
 
 save(scenario.determ, file = "scenarios_deterministic.rda")
 
