@@ -138,7 +138,7 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         );
 
     @constraint(Invest, ResQuota,
-        sum(G[scen, hour, zone, ndisp] for scen in SCEN, for hour in HOURS,
+        sum(G[scen, hour, zone, ndisp] for scen in SCEN, hour in HOURS,
             zone in ZONES, ndisp in NONDISP)
         ==
         param["ResShare"]/100 *
