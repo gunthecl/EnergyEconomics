@@ -148,7 +148,7 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
             zone in ZONES, from_zone in ZONES)
         + sum(EX[scen, hour, zone, to_zone] for scen in SCEN, hour in HOURS,
             zone in ZONES, to_zone in ZONES)
-    );
+        );
     # call solver
     status = solve(Invest)
     # format solution
