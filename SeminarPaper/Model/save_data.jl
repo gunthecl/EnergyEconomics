@@ -25,7 +25,14 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                         elseif contains(key, "Price")
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(Price=data)
-                        elseif contains(key, "Capacity") || contains(key, "Generation")
+                        elseif contains(key, "Generation")
+                            hours = collect(1:hDet)
+                            array = convert(Array, results[r][y][z][key])
+                            data = hcat(hours, array)
+                            df = DataFrame(data)
+                            ext_set = vcat("Hours", sets["Tech"])
+                            names!(df, [Symbol(t) for t in ext_set])
+                        elseif contains(key, "Capacity")
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(data)
                             names!(df, [Symbol(t) for t in sets["Tech"]])
@@ -34,7 +41,7 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                             df = DataFrame(data)
                             names!(df, [Symbol(ndisp) for ndisp in sets["Nondisp"]])
                         end
-                        CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", z,"/", key, ".csv"), df)
                     end
                 end
             end
@@ -48,12 +55,12 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                         data = convert(Array, results[r][z][key])
                         df = DataFrame(data)
                         names!(df, [Symbol(s) for s in sets["Storage"]])
-                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, ".csv"), df)
                     elseif contains(key, "Capacity")
                         data = convert(Array, results[r][z][key])
                         df = DataFrame(data)
                         names!(df, [Symbol(t) for t in sets["Tech"]])
-                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, ".csv"), df)
                     elseif contains(key, string("Scenario ", rand_scen))
                         mkpath(string(path, "_", hSto, "h_", r, "/", z, "/", key))
                         for d in keys(results[r][z][key])
@@ -69,15 +76,18 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                                 data = convert(Array, results[r][z][key][d])
                                 df = DataFrame(Price=data)
                             elseif  contains(d, "Generation")
-                                data = convert(Array, results[r][z][key][d])
+                                hours = collect(1:hSto)
+                                array = convert(Array, results[r][z][key][d])
+                                data = hcat(hours, array)
                                 df = DataFrame(data)
-                                names!(df, [Symbol(t) for t in sets["Tech"]])
+                                ext_set= vcat("Hours", sets["Tech"])
+                                names!(df, [Symbol(t) for t in ext_set])
                             elseif contains(d, "Curtailment")
                                 data = convert(Array, results[r][z][key][d])
                                 df = DataFrame(data)
                                 names!(df, [Symbol(ndisp) for ndisp in sets["Nondisp"]])
                             end
-                            CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, "/", d), df)
+                            CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, "/", d, ".csv"), df)
                         end
                     end
                 end

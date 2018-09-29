@@ -137,17 +137,17 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         CAP_ST_P[zone, stor] <= param["Stor Potentials"][zone]
         );
 
-    @constraint(Invest, ResQuota[scen=SCEN],
-        sum(G[scen, hour, zone, ndisp] for hour in HOURS, zone in ZONES,
-            ndisp in NONDISP)
+    @constraint(Invest, ResQuota,
+        sum(G[scen, hour, zone, ndisp] for scen in SCEN, for hour in HOURS,
+            zone in ZONES, ndisp in NONDISP)
         ==
         param["ResShare"]/100 *
         sum(param["Stochastic Data"][scen]["Demand"][hour, zone]
-            for hour in HOURS, zone in ZONES)
-        - sum(EX[scen, hour, from_zone, zone] for hour in HOURS, zone in ZONES,
-            from_zone in ZONES)
-        + sum(EX[scen, hour, zone, to_zone] for hour in HOURS, zone in ZONES,
-            to_zone in ZONES)
+            for scen in SCEN, hour in HOURS, zone in ZONES)
+        - sum(EX[scen, hour, from_zone, zone] for scen in SCEN, hour in HOURS,
+            zone in ZONES, from_zone in ZONES)
+        + sum(EX[scen, hour, zone, to_zone] for scen in SCEN, hour in HOURS,
+            zone in ZONES, to_zone in ZONES)
     );
     # call solver
     status = solve(Invest)
