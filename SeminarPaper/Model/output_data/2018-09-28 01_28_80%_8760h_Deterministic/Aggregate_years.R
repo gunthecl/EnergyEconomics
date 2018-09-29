@@ -19,8 +19,8 @@ org2015_aggr <- apply(dat.org2015, 2, sum)
 rep2015_aggr <- apply(dat.rep2015, 2, sum)
 
 
-#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_4380h_Deterministic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_4380h_Deterministic")
 
 wd <- getwd()
 
@@ -62,8 +62,7 @@ for (i in c("DE", "DK", "FR","IB", "LU", "UK")){
 
 }
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_168h_Stochastic")
-
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 21_26_40%_168h_Stochastic")
 wd <- getwd()
 
 
