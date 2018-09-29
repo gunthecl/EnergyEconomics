@@ -19,7 +19,9 @@ org2015_aggr <- apply(dat.org2015, 2, sum)
 rep2015_aggr <- apply(dat.rep2015, 2, sum)
 
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_4380h_Deterministic")
+
 wd <- getwd()
 
 dat1987 <- list()
@@ -61,7 +63,9 @@ for (i in c("DE", "DK", "FR","IB", "LU", "UK")){
 }
 
 setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_168h_Stochastic")
+
 wd <- getwd()
+
 
 datstoch <- list()
 for (i in c("DE", "DK", "FR","IB", "LU", "UK")){
@@ -108,7 +112,9 @@ stat2015 <- melt(dat2015, id.vars = c("country", "year"))
 statstoch <- melt(datstoch, id.vars = c("country", "year"))
 
 statall <- rbind(stat1987, stat1998, 
-                 stat2003, stat2010, stat2015, statstoch)
+                 stat2003, stat2010, stat2015
+            #     , statstoch
+                 )
 
 
 # Grouped
@@ -140,3 +146,14 @@ ggplot(statall, aes(fill=variable, y=value, x=country)) +
     scale_fill_brewer(palette = "Spectral") +
     facet_wrap(~year)
 
+
+# Exclude not relevant techs
+stat_select <- statall %>% filter(variable %in% c("Lignite", "Gas", 
+                                                  "WindOnshore", "WindOffshore", "PVGround",
+                                                  "PVRoof", "PumpedStorage E", "PumpedStorage P"))
+
+
+ggplot(stat_select, aes(fill=country, y=value, x=as.factor(year))) + 
+    geom_bar( stat="identity") +
+    scale_fill_brewer(palette = "Set3") +
+    facet_wrap(~variable, scales = "free" )
