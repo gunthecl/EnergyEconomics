@@ -1,5 +1,5 @@
-function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
-    hDet::String, hSto::String)
+function save_data(results::Dict, sets::Dict, resShare::Int, 
+    timeStamp::DateTime, hDet::String, hSto::String)
 
     timeStamp = Dates.format(timeStamp, "yyyy-mm-dd HH_MM")
 
@@ -13,11 +13,30 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                 mkpath(string(path, "_", hDet, "h_", r, "/", y))
                 for z in keys(results[r][y])
                     mkpath(string(path, "_", hDet, "h_", r, "/", y, "/", z))
+                    len = collect(1:length(sets["Tech"]))
+                    cap = DataFrame(Technology=sets["Tech"],
+                                    DK=len,
+                                    FR=len,
+                                    DE=len,
+                                    IB=len,
+                                    LU=len,
+                                    UK=len)
+                    len_stor = collect(1:length(sets["Storage"]))
+                    cap_stor = DataFrame(Technology=sets["Storage"],
+                                    DK=len_stor,
+                                    FR=len_stor,
+                                    DE=len_stor,
+                                    IB=len_stor,
+                                    LU=len_stor,
+                                    UK=len_stor)
                     for key in keys(results[r][y][z])
                         if contains(key, "Storage")
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(data)
                             names!(df, [Symbol(s) for s in sets["Storage"]])
+                            if contains(key, "Storage Power")
+                                cap_stor[Symbol(z)] = data
+                            end
                         elseif contains(key, "Exchange")
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(data)
@@ -36,6 +55,7 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(data)
                             names!(df, [Symbol(t) for t in sets["Tech"]])
+                            cap[Symbol(z)] = data
                         elseif contains(key, "Curtailment")
                             data = convert(Array, results[r][y][z][key])
                             df = DataFrame(data)
@@ -44,6 +64,8 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                         CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", z,"/", key, ".csv"), df)
                     end
                 end
+                append!(cap, cap_stor)
+                CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", "Capacity.csv"), cap)
             end
         elseif r == "Stochastic"
             mkpath(string(path, "_", hSto, "h_", r))
