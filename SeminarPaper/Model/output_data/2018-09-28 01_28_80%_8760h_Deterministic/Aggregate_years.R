@@ -126,8 +126,13 @@ ggplot(statall, aes(fill=variable, y=value, x=country)) +
 
 ggplot(statall, aes(fill=variable, y=value, x=country)) + 
     geom_bar( stat="identity") +
-    scale_fill_brewer(palette = "Set1") +
+    scale_fill_brewer(palette = "Set3") +
     facet_wrap(~year)
+
+ggplot(statall, aes(fill=country, y=value, x=year)) + 
+    geom_bar( stat="identity") +
+    scale_fill_brewer(palette = "Set3") +
+    facet_wrap(~variable, scales = "free" )
 
 
 ggplot(statall, aes(fill=variable, y=value, x=country)) + 
