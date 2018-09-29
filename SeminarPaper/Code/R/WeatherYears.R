@@ -140,9 +140,24 @@ variable.vec     <- str_sub(mean.values$Variable, start = 4, end = 50)
 mean.values$Country <- country.vec
 mean.values$var     <- variable.vec
 
+library(plyr)
+mean.values$var = revalue(mean.values$var, c("pv_national_current"="PV", 
+                      "wind_onshore_current"="Wind Onshore",
+                      "wind_offshore_current" = "Wind Offshore"))
+       
 ggplot(data = mean.values, aes(x=var, y=value)) + geom_boxplot(aes(fill=Country)) + 
-    labs(title="Annual mean availability", 
-         y="Availability")
+    labs(x = "",
+         y="Annual mean availability")  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(
+          axis.title.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+       #   plot.margin=unit(c(1,1,1,2), "cm"),
+          panel.grid = element_blank(), 
+          panel.background = element_blank(),
+          legend.background = element_blank(),
+          legend.box.background = element_blank())
 
 
 mean.values <- spread(data = mean.values[,c(1,3:5)], key = "var", value = "value")
@@ -167,13 +182,12 @@ ggplot((mean.export), aes(fill=variable, y=value, x=year)) +
 
 
 ggplot(mean.values, aes(x=factor(year), group=Country, colour=Country)) +
-    geom_line(aes(y = pv_national_current), linetype = "dashed") + 
-    geom_line(aes(y = wind_onshore_current)) + 
-    geom_line(aes(y = wind_offshore_current), linetype="twodash") +
+    geom_line(aes(y = PV), linetype = "dashed") + 
+    geom_line(aes(y = 'Wind Onshore' )) + 
+    geom_line(aes(y = 'Wind offshore'), linetype="twodash") +
     labs(title="Annual mean availability", 
          y="Availability",
          x = "Year")
-
 
 
 
