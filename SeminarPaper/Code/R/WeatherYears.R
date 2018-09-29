@@ -148,6 +148,24 @@ ggplot(data = mean.values, aes(x=var, y=value)) + geom_boxplot(aes(fill=Country)
 mean.values <- spread(data = mean.values[,c(1,3:5)], key = "var", value = "value")
 
 
+mean.export <- mean.values %>% filter(year %in% c(1987, 1998, 2003,2010,2015))
+write.csv(mean.export, file = "mean_avail_selected_years")
+
+library(xtable)
+options(xtable.floating = FALSE) 
+options(xtable.timestamp = "")
+xtable(mean.export)
+
+mean.export <- melt(data = data.frame(mean.export), id.vars = c("year", "Country"))
+mean.export$year <- as.factor(mean.export$year)
+
+
+ggplot((mean.export), aes(fill=variable, y=value, x=year)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "Set3") +
+  facet_wrap(~variable)
+
+
 ggplot(mean.values, aes(x=factor(year), group=Country, colour=Country)) +
     geom_line(aes(y = pv_national_current), linetype = "dashed") + 
     geom_line(aes(y = wind_onshore_current)) + 
@@ -155,6 +173,9 @@ ggplot(mean.values, aes(x=factor(year), group=Country, colour=Country)) +
     labs(title="Annual mean availability", 
          y="Availability",
          x = "Year")
+
+
+
 
 # Extreme weather years
 dat.2010         <- dat.original[list.year.hours[[2010]],] # low wind, average pv
