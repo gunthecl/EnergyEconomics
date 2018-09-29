@@ -34,7 +34,7 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                             df = DataFrame(data)
                             names!(df, [Symbol(ndisp) for ndisp in sets["Nondisp"]])
                         end
-                        CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", z,"/", key, ".csv"), df)
                     end
                 end
             end
@@ -48,12 +48,12 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                         data = convert(Array, results[r][z][key])
                         df = DataFrame(data)
                         names!(df, [Symbol(s) for s in sets["Storage"]])
-                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, ".csv"), df)
                     elseif contains(key, "Capacity")
                         data = convert(Array, results[r][z][key])
                         df = DataFrame(data)
                         names!(df, [Symbol(t) for t in sets["Tech"]])
-                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key), df)
+                        CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, ".csv"), df)
                     elseif contains(key, string("Scenario ", rand_scen))
                         mkpath(string(path, "_", hSto, "h_", r, "/", z, "/", key))
                         for d in keys(results[r][z][key])
@@ -77,7 +77,7 @@ function save_data(results::Dict, resShare::Int, timeStamp::DateTime,
                                 df = DataFrame(data)
                                 names!(df, [Symbol(ndisp) for ndisp in sets["Nondisp"]])
                             end
-                            CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, "/", d), df)
+                            CSV.write(string(path, "_", hSto, "h_", r, "/", z,"/", key, "/", d, ".csv"), df)
                         end
                     end
                 end
