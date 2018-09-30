@@ -23,9 +23,9 @@ include("greenfield_determ.jl")
 # load input data
 # ------------------------------------------------------------------------------
 folder      = "input_data"      # input data folder
-resShare    = 40                # RES share in %
+resShare    = 80                # RES share in %
 bisect      = true              # true = take every second hour
-hoursSto    = 1:24             # number of timesteps in stochastic model
+hoursSto    = 1:168             # number of timesteps in stochastic model
 hoursDet    = 1:4380            # numer of timesteps in deterministic model
 
 sets, param = load_data(folder, bisect, resShare)
