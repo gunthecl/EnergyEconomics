@@ -149,7 +149,7 @@ ggplot(data = mean.values, aes(x=var, y=value)) + geom_boxplot(aes(fill=Country)
     labs(x = "",
          y="Annual mean availability")  +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) + theme(
           axis.title.x=element_blank(),
           axis.ticks.x=element_blank(),
           axis.title.y=element_blank(),
@@ -159,6 +159,21 @@ ggplot(data = mean.values, aes(x=var, y=value)) + geom_boxplot(aes(fill=Country)
           legend.background = element_blank(),
           legend.box.background = element_blank())
 
+
+ggplot(mean.values, aes(fill=Country, y=value, x=var)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "Set3") +
+  facet_wrap(~var)  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) + theme(
+          axis.title.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          #   plot.margin=unit(c(1,1,1,2), "cm"),
+          panel.grid = element_blank(), 
+          panel.background = element_blank(),
+          legend.background = element_blank(),
+          legend.box.background = element_blank())
 
 mean.values <- spread(data = mean.values[,c(1,3:5)], key = "var", value = "value")
 
@@ -173,12 +188,6 @@ xtable(mean.export)
 
 mean.export <- melt(data = data.frame(mean.export), id.vars = c("year", "Country"))
 mean.export$year <- as.factor(mean.export$year)
-
-
-ggplot((mean.export), aes(fill=variable, y=value, x=year)) + 
-  geom_bar( stat="identity") +
-  scale_fill_brewer(palette = "Set3") +
-  facet_wrap(~variable)
 
 
 ggplot(mean.values, aes(x=factor(year), group=Country, colour=Country)) +

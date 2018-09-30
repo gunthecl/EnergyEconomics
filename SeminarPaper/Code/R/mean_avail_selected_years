@@ -1,4 +1,4 @@
-"","year","Country","pv_national_current","wind_offshore_current","wind_onshore_current"
+"","year","Country","PV","Wind Offshore","Wind Onshore"
 "1",1987,"DE",0.117356997716895,0.300258493150685,0.175638356164384
 "2",1987,"DK",0.10955649543379,0.33251095890411,0.23977448630137
 "3",1987,"FR",0.136012203196347,0.456963652968037,0.235873230593607
