@@ -8,27 +8,26 @@ function save_data(results::Dict, sets::Dict, resShare::Int,
     path = string("output_data/", timeStamp, "_", resShare, "%")
     mkpath("output_data")
 
-    len = collect(1:length(sets["Tech"]))
-    cap = DataFrame(Technology=sets["Tech"],
-                    DK=len,
-                    FR=len,
-                    DE=len,
-                    IB=len,
-                    LU=len,
-                    UK=len)
-    len_stor = collect(1:length(sets["Storage"]))
-    cap_stor = DataFrame(Technology=sets["Storage"],
-                    DK=len_stor,
-                    FR=len_stor,
-                    DE=len_stor,
-                    IB=len_stor,
-                    LU=len_stor,
-                    UK=len_stor)
-
     for r in keys(results)
         if r == "Deterministic"
             mkpath(string(path, "_", hDet, "h_", r))
             for y in keys(results[r])
+                len = collect(1:length(sets["Tech"]))
+                cap = DataFrame(Technology=sets["Tech"],
+                                DK=len,
+                                FR=len,
+                                DE=len,
+                                IB=len,
+                                LU=len,
+                                UK=len)
+                len_stor = collect(1:length(sets["Storage"]))
+                cap_stor = DataFrame(Technology=sets["Storage"],
+                                DK=len_stor,
+                                FR=len_stor,
+                                DE=len_stor,
+                                IB=len_stor,
+                                LU=len_stor,
+                                UK=len_stor)
                 mkpath(string(path, "_", hDet, "h_", r, "/", y))
                 for z in keys(results[r][y])
                     mkpath(string(path, "_", hDet, "h_", r, "/", y, "/", z))
@@ -68,6 +67,7 @@ function save_data(results::Dict, sets::Dict, resShare::Int,
                     end
                 end
                 append!(cap, cap_stor)
+                sets["Tech"] = sets["Tech"][1:7]
                 CSV.write(string(path, "_", hDet, "h_", r, "/", y, "/", "Capacity.csv"), cap)
             end
         elseif r == "Stochastic"
