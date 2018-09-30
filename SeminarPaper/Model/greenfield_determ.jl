@@ -8,7 +8,7 @@ function invest_deterministic(sets::Dict, param::Dict, year::String,
     ZONES   = sets["Zones"]
     STOR    = sets["Storage"]
 
-    Invest = Model(solver=GurobiSolver())
+    Invest = Model(solver=ClpSolver())
 
     # generation
     @variable(Invest, G[HOURS, ZONES, TECH]      >= 0)  # electricity generation

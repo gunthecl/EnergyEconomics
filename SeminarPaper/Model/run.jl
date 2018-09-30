@@ -9,7 +9,7 @@ using CSV
 using DataFrames
 using Dates
 using JuMP
-using Gurobi
+using Clp
 using Plots, StatPlots, UnicodePlots
 
 # include functions
@@ -23,7 +23,7 @@ include("greenfield_determ.jl")
 # load input data
 # ------------------------------------------------------------------------------
 folder      = "input_data"      # input data folder
-resShare    = 95                # RES share in %
+resShare    = 40                # RES share in %
 bisect      = true              # true = take every second hour
 hoursSto    = 1:168             # number of timesteps in stochastic model
 hoursDet    = 1:4380            # numer of timesteps in deterministic model
@@ -32,7 +32,7 @@ sets, param = load_data(folder, bisect, resShare)
 
 # TODO: 2015 whole time series, all 5 years every second hour
 results  = Dict()
-results["Stochastic"] = invest_stochastic(sets, param, hoursSto, GurobiSolver())
+results["Stochastic"] = invest_stochastic(sets, param, hoursSto, ClpSolver())
 results["Deterministic"] = Dict()
 for year in sets["Years"]
     if year == "2016"
