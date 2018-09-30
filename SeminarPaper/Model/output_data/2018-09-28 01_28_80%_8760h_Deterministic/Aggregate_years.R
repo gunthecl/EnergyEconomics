@@ -19,8 +19,8 @@ org2015_aggr <- apply(dat.org2015, 2, sum)
 rep2015_aggr <- apply(dat.rep2015, 2, sum)
 
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
-#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_4380h_Deterministic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 06_12_40%_4380h_Deterministic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_4380h_Deterministic")
 
 wd <- getwd()
 
@@ -62,7 +62,9 @@ for (i in c("DE", "DK", "FR","IB", "LU", "UK")){
 
 }
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 21_26_40%_168h_Stochastic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 21_26_40%_168h_Stochastic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-29 20_15_80%_168h_Stochastic")
+
 wd <- getwd()
 
 
@@ -150,21 +152,24 @@ ggplot(statall, aes(fill=variable, y=value, x=country)) +
 
 # Exclude not relevant techs
 stat_select <- statall %>% filter(variable %in% c(
-                                                 #"Lignite", "Gas", 
-                                                  "WindOnshore", "WindOffshore", "PVGround"
-                                                #  "PVRoof", 
-                                               #   ,"PumpedStorage E", "PumpedStorage P"
+                                                # "Lignite", "Gas"
+                                                 #, 
+                                                 "WindOnshore", "WindOffshore", "PVGround",
+                                                 "PVRoof"
+                                               # "PumpedStorage E", "PumpedStorage P"
                                                 ))
 
 library(plyr)
 stat_select$Country <- stat_select$country
 stat_select$variable = revalue(stat_select$variable, c(
-                                                      "Lignite" = "Lignite", "Gas" = "Gas", 
-                                                      # "WindOnshore" = "Wind Onshore", 
-                                                       #"WindOffshore" = "Wind Offshore",
-                                                       #"PVGround", "PV Ground"
-                                                       #,"PumpedStorage E" = "Pumped Storage Energy", 
-                                                     #  "PumpedStorage P" = "Pumped Storage Power"
+                                                     # "Lignite" = "Lignite", "Gas" = "Gas"
+                                                      #, 
+                                                       "WindOnshore" = "Wind Onshore", 
+                                                       "WindOffshore" = "Wind Offshore",
+                                                       "PVGround" = "PV Ground",
+                                                       "PVRoof" = "PV Roof"
+                                                       #"PumpedStorage E" = "Pumped Storage Energy", 
+                                                      #"PumpedStorage P" = "Pumped Storage Power"
                                                        ))
 
 ggplot(stat_select, aes(fill=Country, y=value, x=as.factor(year))) + 
