@@ -112,9 +112,11 @@ statstoch <- melt(datstoch, id.vars = c("country", "year"))
 
 statall <- rbind(stat1987, stat1998, 
                  stat2003, stat2010, stat2015
-            #     , statstoch
+              , statstoch
                  )
 
+stat.spread <- spread(statall, key = "variable", value = value)
+xtable(stat.spread)
 
 # Grouped
 ggplot(test, aes(fill=variable, y=value, x=country)) + 
@@ -147,12 +149,39 @@ ggplot(statall, aes(fill=variable, y=value, x=country)) +
 
 
 # Exclude not relevant techs
-stat_select <- statall %>% filter(variable %in% c("Lignite", "Gas", 
-                                                  "WindOnshore", "WindOffshore", "PVGround",
-                                                  "PVRoof", "PumpedStorage E", "PumpedStorage P"))
+stat_select <- statall %>% filter(variable %in% c(
+                                                 #"Lignite", "Gas", 
+                                                  "WindOnshore", "WindOffshore", "PVGround"
+                                                #  "PVRoof", 
+                                               #   ,"PumpedStorage E", "PumpedStorage P"
+                                                ))
 
+library(plyr)
+stat_select$Country <- stat_select$country
+stat_select$variable = revalue(stat_select$variable, c(
+                                                      "Lignite" = "Lignite", "Gas" = "Gas", 
+                                                      # "WindOnshore" = "Wind Onshore", 
+                                                       #"WindOffshore" = "Wind Offshore",
+                                                       #"PVGround", "PV Ground"
+                                                       #,"PumpedStorage E" = "Pumped Storage Energy", 
+                                                     #  "PumpedStorage P" = "Pumped Storage Power"
+                                                       ))
 
-ggplot(stat_select, aes(fill=country, y=value, x=as.factor(year))) + 
+ggplot(stat_select, aes(fill=Country, y=value, x=as.factor(year))) + 
     geom_bar( stat="identity") +
     scale_fill_brewer(palette = "Set3") +
-    facet_wrap(~variable, scales = "free" )
+    facet_wrap(~variable, scales = "free" ) + 
+    labs(x = "",
+        y="Capacity in MW")  +
+    theme(strip.background =element_rect(fill="white")) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank(), axis.line = element_line(colour = "grey")) + theme(
+        #     axis.title.x=element_blank(),
+              axis.ticks.x=element_blank(),
+       #       axis.title.y=element_blank(),
+              panel.grid = element_blank(), 
+              panel.background = element_blank(),
+              legend.background = element_blank(),
+              legend.box.background = element_blank()
+              )
+
