@@ -1,10 +1,29 @@
-function save_data(results::Dict, sets::Dict, resShare::Int, 
+function save_data(results::Dict, sets::Dict, resShare::Int,
     timeStamp::DateTime, hDet::String, hSto::String)
 
+    hDet = parse(Int, hDet)
+    hSto = parse(Int, hSto)
     timeStamp = Dates.format(timeStamp, "yyyy-mm-dd HH_MM")
 
     path = string("output_data/", timeStamp, "_", resShare, "%")
     mkpath("output_data")
+
+    len = collect(1:length(sets["Tech"]))
+    cap = DataFrame(Technology=sets["Tech"],
+                    DK=len,
+                    FR=len,
+                    DE=len,
+                    IB=len,
+                    LU=len,
+                    UK=len)
+    len_stor = collect(1:length(sets["Storage"]))
+    cap_stor = DataFrame(Technology=sets["Storage"],
+                    DK=len_stor,
+                    FR=len_stor,
+                    DE=len_stor,
+                    IB=len_stor,
+                    LU=len_stor,
+                    UK=len_stor)
 
     for r in keys(results)
         if r == "Deterministic"
@@ -13,22 +32,6 @@ function save_data(results::Dict, sets::Dict, resShare::Int,
                 mkpath(string(path, "_", hDet, "h_", r, "/", y))
                 for z in keys(results[r][y])
                     mkpath(string(path, "_", hDet, "h_", r, "/", y, "/", z))
-                    len = collect(1:length(sets["Tech"]))
-                    cap = DataFrame(Technology=sets["Tech"],
-                                    DK=len,
-                                    FR=len,
-                                    DE=len,
-                                    IB=len,
-                                    LU=len,
-                                    UK=len)
-                    len_stor = collect(1:length(sets["Storage"]))
-                    cap_stor = DataFrame(Technology=sets["Storage"],
-                                    DK=len_stor,
-                                    FR=len_stor,
-                                    DE=len_stor,
-                                    IB=len_stor,
-                                    LU=len_stor,
-                                    UK=len_stor)
                     for key in keys(results[r][y][z])
                         if contains(key, "Storage")
                             data = convert(Array, results[r][y][z][key])
