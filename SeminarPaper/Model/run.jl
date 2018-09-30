@@ -23,7 +23,7 @@ include("greenfield_determ.jl")
 # load input data
 # ------------------------------------------------------------------------------
 folder      = "input_data"      # input data folder
-resShare    = 95                # RES share in %
+resShare    = 40                # RES share in %
 bisect      = true              # true = take every second hour
 hoursSto    = 1:168             # number of timesteps in stochastic model
 hoursDet    = 1:4380            # numer of timesteps in deterministic model
@@ -45,7 +45,7 @@ end
 
 hours_det = string(length(hoursDet))
 hours_sto = string(length(hoursSto))
-save_data(results, resShare, Dates.now(), hours_det, hours_sto)
+save_data(results, sets, resShare, Dates.now(), hours_det, hours_sto)
 
 s = "Stochastic"
 # quick overview

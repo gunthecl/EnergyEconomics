@@ -103,7 +103,7 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
         stor=STOR; hour != HOURS[1]],
         D_STOR[scen, hour, zone, stor]
         <=
-        CAP_ST_P[zone, stor] - L_STOR[scen, hour-1, zone, stor]
+        CAP_ST_E[zone, stor] - L_STOR[scen, hour-1, zone, stor]
     );
 
     lenResConst = length(SCEN)*length(HOURS)*length(ZONES)*length(NONDISP)
