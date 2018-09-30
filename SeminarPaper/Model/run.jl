@@ -45,7 +45,7 @@ end
 
 hours_det = string(length(hoursDet))
 hours_sto = string(length(hoursSto))
-save_data(results, resShare, Dates.now(), hours_det, hours_sto)
+save_data(results, sets, resShare, Dates.now(), hours_det, hours_sto)
 
 s = "Stochastic"
 # quick overview

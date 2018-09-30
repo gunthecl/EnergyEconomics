@@ -97,7 +97,7 @@ function invest_deterministic(sets::Dict, param::Dict, year::String,
         hour != HOURS[1]],
         D_STOR[hour, zone, stor]
         <=
-        CAP_ST_P[zone, stor] - L_STOR[hour-1, zone, stor]
+        CAP_ST_E[zone, stor] - L_STOR[hour-1, zone, stor]
     );
 
     lenResConst = length(HOURS)*length(ZONES)*length(NONDISP)
@@ -138,12 +138,7 @@ function invest_deterministic(sets::Dict, param::Dict, year::String,
         param["ResShare"]/100 *
         sum(param["Deterministic Data"][year]["Demand"][hour, zone]
             for hour in HOURS, zone in ZONES)
-        - sum(EX[hour, from_zone, zone] for hour in HOURS, zone in ZONES,
-            from_zone in ZONES)
-        + sum(EX[hour, zone, to_zone] for hour in HOURS, zone in ZONES,
-            to_zone in ZONES)
-
-    );
+        );
     # call solver
     status = solve(Invest)
     # format solution
