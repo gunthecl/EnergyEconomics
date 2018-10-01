@@ -9,7 +9,7 @@ using CSV
 using DataFrames
 using Dates
 using JuMP
-using Gurobi
+using Clp
 using Plots, StatPlots, UnicodePlots
 
 # include functions
@@ -32,7 +32,7 @@ sets, param = load_data(folder, bisect, resShare)
 
 # TODO: 2015 whole time series, all 5 years every second hour
 results  = Dict()
-results["Stochastic"] = invest_stochastic(sets, param, hoursSto, GurobiSolver())
+results["Stochastic"] = invest_stochastic(sets, param, hoursSto, ClpSolver())
 results["Deterministic"] = Dict()
 for year in sets["Years"]
     if year == "2016"

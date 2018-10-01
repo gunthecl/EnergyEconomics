@@ -9,7 +9,7 @@ function invest_stochastic(sets::Dict, param::Dict, timeset::UnitRange=1:8760,
     ZONES   = sets["Zones"]
     STOR    = sets["Storage"]
 
-    Invest = Model(solver=GurobiSolver())
+    Invest = Model(solver=ClpSolver())
 
     # generation
     @variable(Invest, G[SCEN, HOURS, ZONES, TECH]      >= 0)  # electricity generation
