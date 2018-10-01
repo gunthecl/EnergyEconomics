@@ -30,7 +30,7 @@ function load_data(folder::String, avg::Bool, RES_percent::Int)
     SCENARIOS = collect(keys(scenarios))
     YEARS     = collect(keys(weatherYears))
 
-    ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)
+    ntc_array = hcat([select(ntc_table, Symbol(z)) for z in ZONES]...)*100000
     ntc = NamedArray(ntc_array, (ZONES, ZONES), ("From_zone", "To_zone"))
 
     potentials_array = hcat([select(potNondisp_table, Symbol(n))
