@@ -19,8 +19,8 @@ org2015_aggr <- apply(dat.org2015, 2, sum)
 rep2015_aggr <- apply(dat.rep2015, 2, sum)
 
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 17_00_40%_4380h_Deterministic")
-#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 15_19_80%_4380h_Deterministic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 17_00_40%_4380h_Deterministic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 15_19_80%_4380h_Deterministic")
 
 wd <- getwd()
 
@@ -62,8 +62,8 @@ for (i in c("DE", "DK", "FR","IB", "LU", "UK")){
 
 }
 
-setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 17_00_40%_168h_Stochastic")
-#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-09-30 15_19_80%_168h_Stochastic")
+#setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-10-01 11_35_40%_168h_Stochastic")
+setwd("/Users/claudiaguenther/Documents/EnergyEconomics/SeminarPaper/Model/output_data/2018-10-01 11_46_80%_168h_Stochastic")
 
 wd <- getwd()
 
@@ -118,7 +118,7 @@ statall <- rbind(stat1987, stat1998,
                  )
 
 stat.spread <- spread(statall, key = "variable", value = value)
-xtable(stat.spread)
+print(xtable(stat.spread[,c(1:9)]), include.rownames=FALSE)
 
 # Grouped
 ggplot(test, aes(fill=variable, y=value, x=country)) + 
@@ -154,22 +154,26 @@ ggplot(statall, aes(fill=variable, y=value, x=country)) +
 stat_select <- statall %>% filter(variable %in% c(
                                                  "Lignite", "Gas",
                                                  #, 
-                                               #  "WindOnshore", "WindOffshore", "PVGround",
-                                               #  "PVRoof"
-                                                "PumpedStorage E", "PumpedStorage P"
+                                              #  "WindOnshore", "WindOffshore", "PVGround"
+                                             #   "PVRoof"
+                                                "PumpedStorage E", "PumpedStorage P",
+                                             "Battery E" , "Battery P" 
                                                 ))
 
 library(plyr)
+
 stat_select$Country <- stat_select$country
 stat_select$variable = revalue(stat_select$variable, c(
                                                       "Lignite" = "Lignite", "Gas" = "Gas",
                                                       #, 
                                                       # "WindOnshore" = "Wind Onshore", 
                                                       # "WindOffshore" = "Wind Offshore",
-                                                      # "PVGround" = "PV Ground",
-                                                      # "PVRoof" = "PV Roof"
+                                                      # "PVGround" = "PV Ground"
+                                                     #  "PVRoof" = "PV Roof"
+                                                     "Battery E" = "Battery Energy",
+                                                     "Battery P" = "Battery Power",
                                                        "PumpedStorage E" = "Pumped Storage Energy", 
-                                                      "PumpedStorage P" = "Pumped Storage Power"
+                                                    "PumpedStorage P" = "Pumped Storage Power"
                                                        ))
 
 ggplot(stat_select, aes(fill=Country, y=value/1000, x=as.factor(year))) + 
